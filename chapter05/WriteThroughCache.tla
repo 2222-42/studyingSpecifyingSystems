@@ -1,0 +1,124 @@
+------------------------- MODULE WriteThroughCache -------------------------
+
+
+EXTENDS Naturals, Sequences, MemoryInterface
+VARIABLES wmem, ctl, buf, cache, memQ
+
+CONSTANT QLen
+
+ASSUME (QLen \in Nat) /\ (QLen > 0)
+
+M == INSTANCE InternalMemory WITH mem <- wmem
+--------------------------------------
+Init == 
+    /\ M!IInit
+    /\ cache = [p \in Proc |-> [a \in Adr |-> NoVal]]
+    /\ memQ = <<>>
+
+TypeInvariant ==
+    /\ wmem \in [Adr -> Val]
+    /\ ctl \in [Proc -> {"rdy", "busy", "done", "waiting"}]
+    /\ buf \in [Proc -> MReq \union Val \union {NoVal}]
+    /\ cache \in [Proc -> [Adr -> Val \union {NoVal}]]
+    /\ memQ \in Seq(Proc \X MReq)
+
+Coherence ==
+    \A p, q \in Proc, a \in Adr:
+        (NoVal \notin {cache[p][a], cache[q][a]}) => (cache[p][a] = cache[q][a])
+--------------------------------------
+
+Req(p) ==
+    M!Req(p) /\ UNCHANGED <<cache, memQ>>
+
+Rsp(p) ==
+    M!Rsp(p) /\ UNCHANGED <<cache, memQ>>
+
+RdMiss(p) ==
+    /\ ctl[p] = "busy"
+    /\ buf[p].op = "Rd"
+    /\ cache[p][buf[p].adr] = NoVal
+    /\ Len(memQ) < QLen
+    /\ memQ' = Append(memQ, <<p, buf[p]>>)
+    /\ ctl' = [ctl EXCEPT ![p] = "waiting"]
+    /\ UNCHANGED <<memInt, wmem, cache, buf>>
+
+DoRd(p) ==
+    /\ ctl[p] \in {"busy", "waiting"}
+    /\ buf[p].op = "Rd"
+    /\ cache[p][buf[p].adr] # NoVal
+    /\ buf' = [buf EXCEPT ![p] = cache[p][buf[p].adr]]
+    /\ ctl' = [ctl EXCEPT ![p] = "done"]
+    /\ UNCHANGED <<memInt, wmem, cache, memQ>>
+
+DoWr(p) ==
+    LET r == buf[p]
+    IN  /\ (ctl[p] = "busy") 
+        /\ (r.op = "Wr")
+        /\ Len(memQ) < QLen
+        /\ cache' = [q \in Proc |-> IF (q = p) \/ (cache[q][r.adr] # NoVal)
+                                        THEN [cache[q] EXCEPT ![r.adr] = r.val]
+                                        ELSE cache[q]]
+        /\ memQ' = Append(memQ, <<p, r>>)
+        /\ buf' = [buf EXCEPT ![p] = NoVal]
+        /\ ctl' = [ctl EXCEPT ![p] = "done"]
+        /\ UNCHANGED <<memInt, wmem>>
+
+MemQWr == 
+    LET r == Head(memQ)[2]
+    IN  /\ (memQ # <<>>) /\ (r.op = "Wr")
+        /\ wmem' = [wmem EXCEPT ![r.adr] = r.val]
+        /\ memQ' = Tail(memQ)
+        /\ UNCHANGED <<memInt, buf, ctl, cache >>
+
+vmem ==
+    LET f[i \in 0..Len(memQ)] ==
+        IF i = 0 THEN wmem
+        ELSE IF memQ[i][2].op = "Rd"
+                THEN f[i - 1]
+                ELSE [f[i - 1] EXCEPT ![memQ[i][2].adr] = memQ[i][2].val]
+    IN f[Len(memQ)]
+
+MemQRd ==
+    LET p == Head(memQ)[1]
+        r == Head(memQ)[2]
+    IN  /\ (memQ # <<>>) /\ (r.op = "Rd")
+        /\ memQ' = Tail(memQ)
+        /\ cache' = [cache EXCEPT ![p][r.adr] = vmem[r.adr]]
+        /\ UNCHANGED <<memInt, wmem, buf, ctl>>
+
+Evict(p, a) ==
+    /\ (ctl[p] = "waiting") => (buf[p].adr # a)
+    /\ cache' = [cache EXCEPT ![p][a] = NoVal]
+    /\ UNCHANGED <<memInt, wmem, buf, ctl, memQ>>
+
+vars == <<memInt, wmem, buf, ctl, cache, memQ>>
+
+QCond == \/ Len(memQ) = QLen
+         \/ \E i \in 1..Len(memQ) : memQ[i][2].op = "Rd"
+
+Liveness ==     /\ \A p \in Proc:   /\ WF_vars(Req(p) \/ DoRd(p))
+                                    /\ SF_vars(RdMiss(p) \/ DoWr(p))
+                /\ WF_vars((QCond /\ MemQWr) \/ MemQRd)
+(* Not the most simplest case: 
+Liveness ==     /\ \A p \in Proc: /\ WF_vars(Req(p) \/ DoRd(p))
+                /\ \A p \in Proc: /\ SF_vars(RdMiss(p) \/ DoWr(p))
+                /\ WF_vars(MemQWr \/ MemQRd)
+*)
+
+
+Next == \/ \E p \in Proc:   \/ Req(p) \/ Rsp(p)
+                            \/ RdMiss(p) \/ DoRd(p) \/ DoWr(p)
+                            \/ \E a \in Adr: Evict(p, a)
+        \/ MemQWr \/ MemQRd
+
+Spec == Init /\ [][Next]_<<memInt, wmem, buf, ctl, cache, memQ>>
+--------------------------------------
+THEOREM Spec => [](TypeInvariant /\ Coherence)
+--------------------------------------
+LM == INSTANCE Memory
+THEOREM Spec => LM!Spec
+
+=============================================================================
+\* Modification History
+\* Last modified Thu Feb 27 21:43:23 JST 2020 by daioh
+\* Created Wed Feb 05 22:48:39 JST 2020 by daioh
