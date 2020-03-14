@@ -25,6 +25,8 @@ RTnow == /\ now \in Real
          /\ \A r \in Real: WF_now(NowNext /\ now' > r)
 
 RTHC == HC /\ RTnow /\ (\EE t: I(t)!HCTime)
+\* RTHC == HC /\ RTnow(hr) /\ RTBoud(HCnxt,hr,3600 - Rho,3600+Rho)
+
 =============================================================================
 \* Modification History
 \* Last modified Sat Mar 14 20:19:56 JST 2020 by daioh
