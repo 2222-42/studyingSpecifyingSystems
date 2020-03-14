@@ -41,4 +41,5 @@ THEOREM Spec => []TypeInvariant
 
 =============================================================================
 \* Modification History
+\* Last modified Sat Mar 14 20:19:28 JST 2020 by daioh
 \* Created Sat Jan 18 06:47:43 JST 2020 by daioh
