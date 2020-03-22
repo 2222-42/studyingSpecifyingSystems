@@ -20,6 +20,12 @@ RTnow(v) ==
         /\ [][NowNext]_now
         /\ \A r \in Real: WF_now(NowNext /\ now' > r)
 
+    (* 
+        /\ now' \in {r \in Real: r> now}
+        /\ <<p', w'>>  = Integrate(D, now, now', <<p,w>>)
+        /\ UNCHANGED v
+     *)
+
 =============================================================================
 \* Modification History
 \* Last modified Sat Mar 14 23:25:37 JST 2020 by daioh
