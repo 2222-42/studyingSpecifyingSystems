@@ -91,6 +91,7 @@ Evict(p, a) ==
     /\ cache' = [cache EXCEPT ![p][a] = NoVal]
     /\ UNCHANGED <<memInt, wmem, buf, ctl, memQ>>
 
+(*
 vars == <<memInt, wmem, buf, ctl, cache, memQ>>
 
 QCond == \/ Len(memQ) = QLen
@@ -99,6 +100,7 @@ QCond == \/ Len(memQ) = QLen
 Liveness ==     /\ \A p \in Proc:   /\ WF_vars(Req(p) \/ DoRd(p))
                                     /\ SF_vars(RdMiss(p) \/ DoWr(p))
                 /\ WF_vars((QCond /\ MemQWr) \/ MemQRd)
+                *)
 (* Not the most simplest case: 
 Liveness ==     /\ \A p \in Proc: /\ WF_vars(Req(p) \/ DoRd(p))
                 /\ \A p \in Proc: /\ SF_vars(RdMiss(p) \/ DoWr(p))
