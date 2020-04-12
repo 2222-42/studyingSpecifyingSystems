@@ -33,6 +33,7 @@ NTwoClocks == /\ (x \in 1..12) /\ (y \in 1..12)
                     \/ HCNy /\ (x' = x)]_<<x, y>>
 
 ClockArray == \A k \in Clock: (hr[k] \in 1..12) /\ [][HCN(hr[k])]_(hr[k])
+LClockArray == \A k \in Clock: (hr[k] \in 1..12) /\ [][HCN(hr[k])]_(hr[k]) /\ WF_{hr[k]}(HCN(hr[k]))
 
 ACN(k) == /\ hr'[k] = (hr[k] % 12) + 1
           /\ \A i \in Clock\{k}: hr'[i] = hr[i]
@@ -46,5 +47,5 @@ Spec == /\ []IsFcnOn(hr, Clock)
 
 =============================================================================
 \* Modification History
-\* Last modified Sat Apr 04 16:30:20 JST 2020 by daioh
+\* Last modified Sun Apr 12 20:54:37 JST 2020 by daioh
 \* Created Fri Apr 03 00:35:39 JST 2020 by daioh
