@@ -95,6 +95,10 @@ IsChannel(c) == c = [ack |-> c.ack, val |-> c.val, rdy |-> c.rdy]
 Spec == /\ [](IsChannel(in) /\ IsChannel(out)) 
         /\ (in.ack = in.rdy) /\ (out.ack = out.rdy)
         /\ Sender /\ Buffer /\ Receiver
+
+OpenSpec == /\ [](IsChannel(in) /\ IsChannel(out)) 
+            /\ (in.ack = in.rdy) /\ Sender /\ Receiver 
+              -+-> (out.ack = out.rdy) /\ Buffer
 =============================================================================
 \* Modification History
 \* Last modified Sun Apr 05 00:28:54 JST 2020 by daioh
