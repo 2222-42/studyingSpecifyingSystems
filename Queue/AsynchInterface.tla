@@ -35,11 +35,18 @@ Next ==
 
 Spec == Init /\ [][Next]_<<val, rdy, ack>>
 
+(*
+I don't know how to should write the code to compare the different specs.
+-------------------------------------------------------------------------
+C(chan) == INSTANCE Cahnnel 
+AIEq == Spec <=> \EE chan: (C(chan)![](chan = [val |-> val, rdy |-> rdy, ack |-> ack]) /\ C(chan)!Spec)
+-------------------------------------------------------------------------
+*)
 --------------------------------------------------------------
 
 THEOREM Spec => []TypeInvariant
 
 =============================================================================
 \* Modification History
-\* Last modified Sat Mar 14 20:19:28 JST 2020 by daioh
+\* Last modified Sat Apr 18 13:23:53 JST 2020 by daioh
 \* Created Sat Jan 18 06:47:43 JST 2020 by daioh
