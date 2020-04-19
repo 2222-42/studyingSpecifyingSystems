@@ -1,23 +1,23 @@
-# what I am doing
+# Read me
 
-## The main
+## The main to do
 
-TLA+の勉強を配信する．
+TLA+の勉強
 
-## The Others
+### The Others
 
-ボイチェンの練習として，朗読したり，ゲームしたりします．
+配信で使う資料の共有
 
-# The reasons
+## The reasons to make repository
 
-## why Brodcasting?
+忘れるのと端末ごとでの共有が面倒なので。
+
+### why Brodcasting
 
 配信という形式だと長続きしそうだから．
 
-## Why I am using facerig and voice-changer
+### Why I am using facerig and voice-changer
 
 おっさんがおっさんの声と顔で配信してても，面白くない．
 
 なので，配信をするなら，なるべく可愛い女の子の声と顔の方が良いから．
-
-## 
