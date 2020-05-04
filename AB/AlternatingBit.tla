@@ -11,7 +11,7 @@ ABInit == /\ msgQ = <<>>
           /\ sent \in Data
           /\ rcvd \in Data
 
-ABTypeInv == /\ msgQ \in Seq({o,1} \X Data)
+ABTypeInv == /\ msgQ \in Seq({0,1} \X Data)
              /\ ackQ \in Seq({0,1})
              /\ sBit \in {0,1}
              /\ sAck \in {0,1}
@@ -34,7 +34,7 @@ ReSndMsg ==
 RcvMsg ==
     /\ msgQ # <<>>
     /\ msgQ' = Tail(msgQ)
-    /\ rBit' = Hand(msgQ)[1]
+    /\ rBit' = Head(msgQ)[1]
     /\ rcvd' = Head(msgQ)[2]
     /\ UNCHANGED <<ackQ, sBit, sAck, rBit, sent, rcvd>>
 
@@ -66,7 +66,7 @@ abvars == <<sBit, sAck, sent, rcvd, rBit, msgQ, ackQ>>
 ABFiarness == /\ WF_abvars(ReSndMsg) /\ WF_abvars(SndAck)
               /\ SF_abvars(RcvMsg) /\ SF_abvars(RcvAck)
 -----------------------------------------------------------------------------
-ABSpec = ABInit /\ [][ABNext]_abvars /\ ABFiarness
+ABSpec == ABInit /\ [][ABNext]_abvars /\ ABFiarness
 -----------------------------------------------------------------------------
 THEOREM ABSpec => []ABTypeInv
 =============================================================================
