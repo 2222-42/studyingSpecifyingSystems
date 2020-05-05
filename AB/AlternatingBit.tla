@@ -5,7 +5,7 @@ VARIABLES sBit, sAck, sent, rcvd, rBit, msgQ, ackQ
 -----------------------------------------------------------------------------
 ABInit == /\ msgQ = <<>>
           /\ ackQ = <<>>
-          /\ sBit = {0, 1}
+          /\ sBit \in {0, 1}
           /\ sAck = sBit
           /\ rBit = sBit
           /\ sent \in Data
@@ -36,7 +36,7 @@ RcvMsg ==
     /\ msgQ' = Tail(msgQ)
     /\ rBit' = Head(msgQ)[1]
     /\ rcvd' = Head(msgQ)[2]
-    /\ UNCHANGED <<ackQ, sBit, sAck, rBit, sent, rcvd>>
+    /\ UNCHANGED <<ackQ, sBit, sAck, sent>>
 
 SndAck ==
     /\ ackQ' = Append(ackQ, rBit)
@@ -65,6 +65,8 @@ ABNext == \/ \E d \in Data : SndNewValue(d)
 abvars == <<sBit, sAck, sent, rcvd, rBit, msgQ, ackQ>>
 ABFiarness == /\ WF_abvars(ReSndMsg) /\ WF_abvars(SndAck)
               /\ SF_abvars(RcvMsg) /\ SF_abvars(RcvAck)
+-----------------------------------------------------------------------------
+InvProperty == []ABTypeInv
 -----------------------------------------------------------------------------
 ABSpec == ABInit /\ [][ABNext]_abvars /\ ABFiarness
 -----------------------------------------------------------------------------
