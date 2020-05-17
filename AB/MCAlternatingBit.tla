@@ -5,7 +5,7 @@ INSTANCE ABCorrectness
 
 CONSTANT msgQLen, ackQLen
 
-SeqConstant == /\ Len(msgQ) <= msgQLen
+SeqConstraint == /\ Len(msgQ) <= msgQLen
                /\ Len(ackQ) <= ackQLen
 
 SentLeadsToRcvd ==
@@ -13,11 +13,19 @@ SentLeadsToRcvd ==
 
 \* AB(h) == INSTANCE ABCorrectness
 \* THEOREM ABSpec => \EE h : AB(h)!ABCSpec
+(* I am not sure how to make state function `oh`  *)
 \*oh == Data
 \*ABCSpecBar == AB(oh)!ABCSpec
 \*
 \*THEOREM ABSpec => ABCSpecBar
+\*
+ImpliedAction == [ABCNext]_cvars
+
+TNext == WF_msgQ(~ABTypeInv')
+TProp == \A d \in Data : (sent = d) => [](sent = d)
+
+CSpec == ABSpec /\ TNext
 =============================================================================
 \* Modification History
-\* Last modified Tue May 05 15:13:35 JST 2020 by daioh
+\* Last modified Sun May 17 20:03:58 JST 2020 by daioh
 \* Created Tue May 05 06:31:05 JST 2020 by daioh
