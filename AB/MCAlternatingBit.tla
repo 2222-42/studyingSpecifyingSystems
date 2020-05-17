@@ -19,6 +19,8 @@ SentLeadsToRcvd ==
 \*
 \*THEOREM ABSpec => ABCSpecBar
 \*
+
+(* the followings are cpied from tlaplus/Examples *)
 ImpliedAction == [ABCNext]_cvars
 
 TNext == WF_msgQ(~ABTypeInv')
