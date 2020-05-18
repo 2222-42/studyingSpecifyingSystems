@@ -2,6 +2,7 @@
 
 VARIABLES memInt
 
+(* you can use symmetry set to Proc and Adr. *)
 CONSTANTS   Send(_, _, _, _),
             Reply(_, _, _, _),
             InitMemInt,
