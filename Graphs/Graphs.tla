@@ -21,7 +21,9 @@ UndirectedSubraph(G) ==
     {H \in DirectedSubgraph(G) : IsUndirectedGraph(H)}
 
 -----------------------------------------------------------------------------
-
+(*  Stephan suggests to redefine Seq as
+UNION{[1..n -> S]: n \in 0..N} in the TLC model to avoid changing the
+original spec.*)
 Path(G) == 
     {p \in Seq(G.node): /\ p # <<>>
                         /\ \A i \in 1..(Len(p) - 1): <<p[i], p[i+1]>> \in G.edge }
