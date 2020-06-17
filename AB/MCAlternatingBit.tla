@@ -29,5 +29,5 @@ TProp == \A d \in Data : (sent = d) => [](sent = d)
 CSpec == ABSpec /\ TNext
 =============================================================================
 \* Modification History
-\* Last modified Sun May 17 20:03:58 JST 2020 by daioh
+\* Last modified Wed May 27 16:32:09 JST 2020 by daioh
 \* Created Tue May 05 06:31:05 JST 2020 by daioh
