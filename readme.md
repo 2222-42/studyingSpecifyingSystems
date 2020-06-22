@@ -2,22 +2,17 @@
 
 ## The main to do
 
-TLA+の勉強
+- TLA+の勉強
+- GoogleGroupで読んだことの蓄積
 
-### The Others
+### The Others to do
 
-配信で使う資料の共有
+~配信で使う資料の共有~ => 配信しなくても勉強が続いた。
 
-## The reasons to make repository
+## Tips
 
-忘れるのと端末ごとでの共有が面倒なので。
+### To inspect the modules
 
-### why Brodcasting
+> How to inspect the standard modules like Integers, Sequences and so on. 
 
-配信という形式だと長続きしそうだから．
-
-### Why I am using facerig and voice-changer
-
-おっさんがおっさんの声と顔で配信してても，面白くない．
-
-なので，配信をするなら，なるべく可愛い女の子の声と顔の方が良いから．
+ctrl+click (command+click?) a module name that appears on the EXTENDS statement at the top of your spec
