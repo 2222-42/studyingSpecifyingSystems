@@ -3,6 +3,8 @@
 ## The main to do
 
 - TLA+の勉強
+  - Specifying Systems(DONE)
+  - Auxiliary Variables in TLA+
 - GoogleGroupで読んだことの蓄積
 
 ### The Others to do
