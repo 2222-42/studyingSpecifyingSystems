@@ -16,3 +16,8 @@
 > How to inspect the standard modules like Integers, Sequences and so on. 
 
 ctrl+click (command+click?) a module name that appears on the EXTENDS statement at the top of your spec
+
+### To check the eploring spec's model
+
+- Use cloud services
+- To make the size of constants smaller
