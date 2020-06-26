@@ -30,12 +30,45 @@ TypeInvariants == /\ t1 \in Positions
                   /\ sw1 \in {"STRAIGHT", "LEFT"}
                   /\ sw2 \in {"STRAIGHT", "RIGHT"}
 
-\* GOALs
+\* GOALs or Terminations, and Liveness
 NoCollisions == t1 # t2
 
 Train1Crossed == t1 = "TRACK4"
 Train2Crossed == t2 = "TRACK1"
 CrossingSuccessful == <>Train1Crossed /\ <>Train2Crossed
+
+(*
+John Gall "A complex system that works is invariably found to have evolved from a simple system that worked."
+-> begin with the simplest behavior possible
+*)
+
+\* Move Train 1 in a straight line
+MoveT1 == /\ /\ \/ t1 = "TRACK1"
+                \/ t1' = "SWITCH1"
+             /\ \/ t1 = "SWITCH1"
+                \/ t1' = "TRACK2"
+             /\ \/ t1 = "TRACK2"
+                \/ t1' = "SWITCH2"
+             /\ \/ t1 = "SWITCH2"
+                \/ t1' = "TRACK4"
+          /\ UNCHANGED <<t2, s1, s2, s3, s4, sw1, sw2>>
+
+\* Move Train 2 in a straight line
+MoveT2 == /\ /\ \/ t2 = "TRACK4"
+                \/ t2' = "SWITCH2"
+             /\ \/ t2 = "SWITCH2"
+                \/ t2' = "TRACK2"
+             /\ \/ t2 = "TRACK2"
+                \/ t2' = "SWITCH1"
+             /\ \/ t2 = "SWITCH1"
+                \/ t2' = "TRACK1"
+          /\ UNCHANGED <<t1, s1, s2, s3, s4, sw1, sw2>>
+
+\* First Specification
+
+ Next == MoveT1 \/ MoveT2
+ Spec == Init /\ [][Next]_vars 
+
 
 =============================================================================
 \* Modification History
