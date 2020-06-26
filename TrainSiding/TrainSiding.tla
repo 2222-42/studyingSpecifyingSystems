@@ -66,8 +66,9 @@ MoveT2 == /\ /\ \/ t2 = "TRACK4"
 
 \* First Specification
 
- Next == MoveT1 \/ MoveT2
- Spec == Init /\ [][Next]_vars 
+vars == <<t1, t2, s1, s2, s3, s4, sw1, sw2>>
+Next == MoveT1 \/ MoveT2
+Spec == Init /\ [][Next]_vars 
 
 
 =============================================================================
