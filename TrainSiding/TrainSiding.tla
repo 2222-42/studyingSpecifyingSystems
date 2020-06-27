@@ -1,5 +1,8 @@
 ---------------------------- MODULE TrainSiding ----------------------------
 
+\* This module is derived from stefan's good example.(cf: https://www.heinbockel.eu/2019/12/08/train-sidings-a-tla-example/ )
+\* I read his posts, make his spec by myself and improve this to solve his question.
+
 \*The first step in modeling is always to decide what to include in the model and what to exclude. 
 
 \*The first thing I needed to decide was which variables describe the model. 
