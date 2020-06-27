@@ -79,6 +79,11 @@ MoveT2 == /\ \/ /\ t2 = "TRACK4"
                 /\ t2' = "SWITCH1"
                 /\ s3' = "STOP"
                 /\ UNCHANGED s4
+             \/ /\ t2 = "TRACK3"
+                /\ s3 = "GO" \* add the condition to prevent from collisions
+                /\ t2' = "SWITCH1"
+                /\ s3' = "STOP"
+                /\ UNCHANGED s4
              \/ /\ t2 = "SWITCH1"
                 /\ t2' = "TRACK1"
                 /\ UNCHANGED <<s3, s4>>
@@ -102,14 +107,14 @@ ChangeS2 == /\ t1 \in {"TRACK2", "TRACK3"} \* train 1 is waiting in front of the
             /\ UNCHANGED <<t1, t2, s1, s3, s4, sw1, sw2>>
 
 \* To swith semaphore 4 from "STOP" to "GO"
-ChangeS3 == /\ t2 = "TRACK4" \* train 1 is waiting in front of the semaphore 4.
-            /\ t1 \notin {"TRACK2", "SWITCH2"} \* train is not on the track that train 1 wants to enter
-            /\ sw2 = "STRAIGHT"
+ChangeS3 == /\ t2 \in {"TRACK2", "TRACK3"} \* train 1 is waiting in front of the semaphore 3.
+            /\ t1 \notin {"TRACK1", "SWITCH1"} \* train is not on the track that train 1 wants to enter
+            \* /\ sw2 = "STRAIGHT"
             /\ s3' = "GO"
             /\ UNCHANGED <<t1, t2, s1, s4, s2, sw1, sw2>>
 
-ChangeS4 == /\ t2 \in {"TRACK2", "TRACK3"} \* train 1 is waiting in front of the semaphore 3.
-            /\ t1 \notin {"TRACK1", "SWITCH1"} \* train is not on the track that train 1 wants to enter
+ChangeS4 == /\ t2 = "TRACK4" \* train 1 is waiting in front of the semaphore 4.
+            /\ t1 \notin {"TRACK3", "SWITCH2"} \* train is not on the track that train 1 wants to enter
             /\ sw2 = "RIGHT"
             /\ s4' = "GO"
             /\ UNCHANGED <<t1, t2, s1, s3, s2, sw1, sw2>>
@@ -117,22 +122,29 @@ ChangeS4 == /\ t2 \in {"TRACK2", "TRACK3"} \* train 1 is waiting in front of the
 \* To change the switches
 \* semaphore should be "STOP" before change switches
 \* If train is on switches, should not change the switches
+\* If the oncoming train is on the track, should not change the switches to it.
 ChangeSw1 == /\ s1 = "STOP"
              /\ s3 = "STOP"
              /\ t1 # "SWITCH1"
              /\ \/ /\ sw1 = "STRAIGHT"
+                   /\ t2 # "TRACK3"
+                   /\ t1 # "TRACK1" \* Only change switch one once track 1 is free
                    /\ sw1' = "LEFT"
                 \/ /\ sw1 = "LEFT"
+                   /\ t1 = "TRACK1"
                    /\ sw1' = "STRAIGHT"
              /\ UNCHANGED <<t1, t2, s1, s2, s3, s4, sw2>> 
 
 ChangeSw2 == /\ s2 = "STOP"
              /\ s4 = "STOP"
              /\ t2 # "SWITCH2"
-             /\ \/ /\ sw2 = "STRAIGHT"
-                   /\ sw2' = "RIGHT"
-                \/ /\ sw2 = "RIGHT"
+             /\ \/ /\ sw2 = "RIGHT"
+                   /\ t1 # "TRACK2"
+                   /\ t2 # "TRACK4"
                    /\ sw2' = "STRAIGHT"
+                \/ /\ sw2 = "STRAIGHT"
+                   /\ t2 = "TRACK4"
+                   /\ sw2' = "RIGHT"
              /\ UNCHANGED <<t1, t2, s1, s2, s3, s4, sw1>> 
 
 \* First Specification
@@ -141,6 +153,14 @@ vars == <<t1, t2, s1, s2, s3, s4, sw1, sw2>>
 \* Add the action to change semaphores and to change switches
 Next == MoveT1 \/ MoveT2 \/ ChangeS1 \/ ChangeS2 \/ ChangeS3 \/ ChangeS4 \/ ChangeSw1 \/ ChangeSw2
 Spec == Init /\ [][Next]_vars 
+        /\ WF_vars(MoveT1) 
+        /\ WF_vars(MoveT2) 
+        /\ WF_vars(ChangeS1) 
+        /\ WF_vars(ChangeS2) 
+        /\ WF_vars(ChangeS3) 
+        /\ WF_vars(ChangeS4) 
+        /\ WF_vars(ChangeSw1) 
+        /\ WF_vars(ChangeSw2)  
 
 
 =============================================================================
