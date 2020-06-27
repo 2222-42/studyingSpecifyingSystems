@@ -44,70 +44,92 @@ John Gall "A complex system that works is invariably found to have evolved from 
 
 \* First: Move Train 1 in a straight line
 \* Second: To prevent the collisions, add the condition for s1 and s2
+\* Third: To order the switches, but make simplifier, set if-else for MoveT2
+\* Fourth: To prevent the collisions initialize the semaphores.
 MoveT1 == /\ \/ /\ t1 = "TRACK1"
                 /\ s1 = "GO" \* add the condition to prevent from collisions
                 /\ t1' = "SWITCH1"
+                /\ s1' = "STOP"
+                /\ UNCHANGED s2
              \/ /\ t1 = "SWITCH1"
                 /\ t1' = "TRACK2"
+                /\ UNCHANGED <<s1, s2>>
              \/ /\ t1 = "TRACK2"
                 /\ s2 = "GO" \* add the condition to prevent from collisions
                 /\ t1' = "SWITCH2"
+                /\ s2' = "STOP"
+                /\ UNCHANGED s1
              \/ /\ t1 = "SWITCH2"
                 /\ t1' = "TRACK4"
-          /\ UNCHANGED <<t2, s1, s2, s3, s4, sw1, sw2>>
+                /\ UNCHANGED <<s1, s2>>
+          /\ UNCHANGED <<t2, s3, s4, sw1, sw2>>
 
 \* Move Train 2 in a straight line
 \* To prevent the collisions, add the condition for s1 and s2
 MoveT2 == /\ \/ /\ t2 = "TRACK4"
                 /\ s4 = "GO" \* add the condition to prevent from collisions
                 /\ t2' = "SWITCH2"
+                /\ s4' = "STOP"
+                /\ UNCHANGED s3
              \/ /\ t2 = "SWITCH2"
-                /\ t2' = "TRACK2"
+                /\ t2' = IF sw2 = "STRAIGHT" THEN "TRACK2" ELSE "TRACK3"
+                /\ UNCHANGED <<s3, s4>>
              \/ /\ t2 = "TRACK2"
                 /\ s3 = "GO" \* add the condition to prevent from collisions
                 /\ t2' = "SWITCH1"
+                /\ s3' = "STOP"
+                /\ UNCHANGED s4
              \/ /\ t2 = "SWITCH1"
                 /\ t2' = "TRACK1"
-          /\ UNCHANGED <<t1, s1, s2, s3, s4, sw1, sw2>>
+                /\ UNCHANGED <<s3, s4>>
+          /\ UNCHANGED <<t1, s1, s2, sw1, sw2>>
 
 \* To swith semaphores 1 and 2 from "STOP" to "GO", by naive way.
 \* The following condition is not enough for trains to avoid collisions by the following reason:
 \* 1. If Train 1 is on "TRACK1" and train 2 on "TRACK4", then each of semaphores s1 and s2 can be "GO".
 \* 2. And then, there is no way to change from "GO" to "STOP" in the time.
 \* 3. So, there comes a collision.
+\* To prevent the above case, should initialize semaphore to Action MoveT1 and MoveT2
 ChangeS1 == /\ t1 = "TRACK1" \* train 1 is waiting in front of the semaphore 1.
             /\ t2 \notin {"TRACK2", "SWITCH1"} \* train is not on the track that train 1 wants to enter
             /\ sw1 = "STRAIGHT"
             /\ s1' = "GO"
             /\ UNCHANGED <<t1, t2, s2, s3, s4, sw1, sw2>>
 
-ChangeS2 == /\ t1 = "TRACK1" \* train 1 is waiting in front of the semaphore 1.
-            /\ t2 \notin {"TRACK3", "SWITCH1"} \* train is not on the track that train 1 wants to enter
-            /\ sw1 = "LEFT"
+ChangeS2 == /\ t1 \in {"TRACK2", "TRACK3"} \* train 1 is waiting in front of the semaphore 2.
+            /\ t2 \notin {"TRACK4", "SWITCH2"} \* train is not on the track that train 1 wants to enter
             /\ s2' = "GO"
             /\ UNCHANGED <<t1, t2, s1, s3, s4, sw1, sw2>>
 
 \* To swith semaphore 4 from "STOP" to "GO"
-ChangeS3 == /\ t2 = "TRACK4" \* train 1 is waiting in front of the semaphore 1.
+ChangeS3 == /\ t2 = "TRACK4" \* train 1 is waiting in front of the semaphore 4.
             /\ t1 \notin {"TRACK2", "SWITCH2"} \* train is not on the track that train 1 wants to enter
             /\ sw2 = "STRAIGHT"
             /\ s3' = "GO"
             /\ UNCHANGED <<t1, t2, s1, s4, s2, sw1, sw2>>
 
-ChangeS4 == /\ t2 = "TRACK4" \* train 1 is waiting in front of the semaphore 1.
-            /\ t1 \notin {"TRACK3", "SWITCH2"} \* train is not on the track that train 1 wants to enter
+ChangeS4 == /\ t2 \in {"TRACK2", "TRACK3"} \* train 1 is waiting in front of the semaphore 3.
+            /\ t1 \notin {"TRACK1", "SWITCH1"} \* train is not on the track that train 1 wants to enter
             /\ sw2 = "RIGHT"
             /\ s4' = "GO"
             /\ UNCHANGED <<t1, t2, s1, s3, s2, sw1, sw2>>
 
 \* To change the switches
-ChangeSw1 == /\ \/ /\ sw1 = "STRAIGHT"
+\* semaphore should be "STOP" before change switches
+\* If train is on switches, should not change the switches
+ChangeSw1 == /\ s1 = "STOP"
+             /\ s3 = "STOP"
+             /\ t1 # "SWITCH1"
+             /\ \/ /\ sw1 = "STRAIGHT"
                    /\ sw1' = "LEFT"
                 \/ /\ sw1 = "LEFT"
                    /\ sw1' = "STRAIGHT"
              /\ UNCHANGED <<t1, t2, s1, s2, s3, s4, sw2>> 
 
-ChangeSw2 == /\ \/ /\ sw2 = "STRAIGHT"
+ChangeSw2 == /\ s2 = "STOP"
+             /\ s4 = "STOP"
+             /\ t2 # "SWITCH2"
+             /\ \/ /\ sw2 = "STRAIGHT"
                    /\ sw2' = "RIGHT"
                 \/ /\ sw2 = "RIGHT"
                    /\ sw2' = "STRAIGHT"
