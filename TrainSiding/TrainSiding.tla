@@ -35,6 +35,7 @@ NoCollisions == t1 # t2
 
 Train1Crossed == t1 = "TRACK4"
 Train2Crossed == t2 = "TRACK1"
+\* Termination Property
 CrossingSuccessful == <>Train1Crossed /\ <>Train2Crossed
 
 (*
@@ -151,17 +152,27 @@ ChangeSw2 == /\ s2 = "STOP"
 vars == <<t1, t2, s1, s2, s3, s4, sw1, sw2>>
 \* Next == MoveT1 \/ MoveT2
 \* Add the action to change semaphores and to change switches
-Next == MoveT1 \/ MoveT2 \/ ChangeS1 \/ ChangeS2 \/ ChangeS3 \/ ChangeS4 \/ ChangeSw1 \/ ChangeSw2
-Spec == Init /\ [][Next]_vars 
-        /\ WF_vars(MoveT1) 
-        /\ WF_vars(MoveT2) 
-        /\ WF_vars(ChangeS1) 
-        /\ WF_vars(ChangeS2) 
-        /\ WF_vars(ChangeS3) 
-        /\ WF_vars(ChangeS4) 
-        /\ WF_vars(ChangeSw1) 
-        /\ WF_vars(ChangeSw2)  
+Next == \/ MoveT1 
+        \/ MoveT2 
+        \/ ChangeS1 
+        \/ ChangeS2 
+        \/ ChangeS3 
+        \/ ChangeS4 
+        \/ ChangeSw1 
+        \/ ChangeSw2 
+        \/ (Train1Crossed /\ Train2Crossed /\ UNCHANGED vars) \* To terminate and to prevent deadlock
 
+
+Fairness == /\ WF_vars(MoveT1) 
+            /\ WF_vars(MoveT2) 
+            /\ WF_vars(ChangeS1) 
+            /\ WF_vars(ChangeS2) 
+            /\ WF_vars(ChangeS3) 
+            /\ WF_vars(ChangeS4) 
+            /\ WF_vars(ChangeSw1) 
+            /\ WF_vars(ChangeSw2)  
+
+Spec == Init /\ [][Next]_vars /\ Fairness
 
 =============================================================================
 \* Modification History
