@@ -43,22 +43,28 @@ John Gall "A complex system that works is invariably found to have evolved from 
 *)
 
 \* Move Train 1 in a straight line
+\* To prevent the collisions, add the condition for s1 and s2
 MoveT1 == /\ \/ /\ t1 = "TRACK1"
+                /\ s1 = "GO"
                 /\ t1' = "SWITCH1"
              \/ /\ t1 = "SWITCH1"
                 /\ t1' = "TRACK2"
              \/ /\ t1 = "TRACK2"
+                /\ s2 = "GO"
                 /\ t1' = "SWITCH2"
              \/ /\ t1 = "SWITCH2"
                 /\ t1' = "TRACK4"
           /\ UNCHANGED <<t2, s1, s2, s3, s4, sw1, sw2>>
 
 \* Move Train 2 in a straight line
+\* To prevent the collisions, add the condition for s1 and s2
 MoveT2 == /\ \/ /\ t2 = "TRACK4"
+                /\ s2 = "GO"
                 /\ t2' = "SWITCH2"
              \/ /\ t2 = "SWITCH2"
                 /\ t2' = "TRACK2"
              \/ /\ t2 = "TRACK2"
+                /\ s1 = "GO"
                 /\ t2' = "SWITCH1"
              \/ /\ t2 = "SWITCH1"
                 /\ t2' = "TRACK1"
