@@ -26,3 +26,36 @@ implementations は Higher-level specificationが要求していることを満�
 - `Stuttering variables`: 実際の変数を何も変更しない"stuttering stepsを追加するもの
 
 Auxiliary VariablesはLivenessの条件には影響を与えないので、Livess については少しだけ言及する。
+
+# 2 Refinement Mappings
+
+想定している事柄として、定数を導入する。
+
+Make a simple, useless example. The server responds to each input value i with one of the following outputs:
+
+- `Hi` if i is the largest number input so far, 
+- `Lo` if it's the smallest number input so far, 
+- `Both` if it's both, and
+- `None` if it's neither.
+
+## 2.1 Specication MinMax1
+
+まずは変数を決める。
+
+The module named `MinMax1` describes the interaction of the user and the server with two variables:
+
+1. variable `x` to hold an input or a response,
+2. a variable `turn` that indicates whether it's the user's turn to input a value or the server's turn to respond.
+
+The specication also uses a variable y to hold the set of values input so far.
+
+初期値を決める。
+
+Nextに入るアクションを決める。InputNumとRespondの2つがある。
+
+InputNumはすごく単純。ただし、enabledになるのはturn = "input"の場合のみ。
+
+Respondについては単純にするために`setMax`と`setMin`を導入する。
+enabledになるのはturn = "output"の場合のみ。
+
+これでSpecを定義できる。varsには使う変数のタプルを入れる。
