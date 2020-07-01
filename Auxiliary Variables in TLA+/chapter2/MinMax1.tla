@@ -1,4 +1,7 @@
 ------------------------------ MODULE MinMax1 ------------------------------
+(* The purpose of this specication is to describe the interaction of the user
+and the server. *)
+
 EXTENDS Integers
 
 \* What the server respond to user
@@ -6,6 +9,8 @@ CONSTANTS Hi, Lo, Both, None
 \* The values of responses and of inputs should be separeted.
 ASSUME {Hi, Lo, Both, None} \cap Int = {}
 
+\* This interaction is described by the values of x and turn. (externally visible or observable)
+\* y is needed only to describe how the values of x and turn can change.(Internal variable)
 VARIABLES x, y, turn
 
 Init == /\ x = None
