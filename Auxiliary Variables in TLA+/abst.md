@@ -59,3 +59,66 @@ Respondについては単純にするために`setMax`と`setMin`を導入する
 enabledになるのはturn = "output"の場合のみ。
 
 これでSpecを定義できる。varsには使う変数のタプルを入れる。
+
+## 2.2 The Hiding Operator \EE
+
+用語：
+
+- a behavior is a sequence of states
+- a state is an assignment of values to all possible variables
+
+2つの変数：
+
+- the externally visible or observable values of the specication
+- internal variable.
+
+Internal Variableは`\EE`で書くことができる。
+
+- `F`: temporal formula
+- `v`: variable
+
+Defiition of `\EE v: F`:
+
+厳密な定義は複雑なので、単純に説明すると, behavior `\sigma` satisfies `\EE v: F` 
+iff there eists a behavior `\tau` s.t.
+- `\tau` satisfies `F`
+- `\tau` is identical to `\sigma` except for the values its states assign to `v`
+
+> The operator `\EE` is much like the ordinary
+existential quantier `\E` except that `\EE v : F` asserts the existence not of a single
+value for `v` that makes `F` true but rather of a sequence of values, one for each state
+in the behavior, that makes `F` true on the behavior.
+
+MinMax1で`\EE y: Spec`を導入しない理由：
+
+- `y` が `Spec`の定義の中に表れていて、式がillegalになるから
+
+e.g., `{v \in exp : v^2 > 42}`という表現は、`v`がすでに宣言もしくは定義されているModuleの中では許容しない。
+
+hidden variable `v`を含む`Spec`の式を書く方法(ways to write the formula `Spec` with `v` hidden in TLA+.):
+
+1. MinMax1を生成する別のモジュールを書く
+
+別のモジュールを書くのは、TLA+ tools は `\EE` を含むspecificationをチェックできないから。(there's little reason to do it since the TLA+ tools cannot check specications written with `\EE`)
+TLAPSは場合によってはできる。
+
+別のモジュールを書く方法：
+
+- `\EE y : Spec`を`\EE y : [|Spec|]`の省略形とみなす(we take the formula `\EE y : Spec` to be an abbreviation for the formula `\EE y : [|Spec|]` , )
+  - `[|Spec|]`は`Spec`から全ての定義を拡張して得られたもの(where `[|Spec|]` is the formula obtained from `Spec` by expanding all definitions. )
+  - `[|Spec|]`はTLA+の原始的なもののみを含んでいるとする(Formula `[|Spec|]` contains only: TLA+ primitives;)
+- `y` がすでに意味を与えられているなら、新たなsymbolに置き換える必要がある。(If used in a context in which `y` already has a meaning,)
+  - we interpret `\EE y : Spec` to be the formula obtained from `\EE y : [|Spec|]` by replacing `y` everywhere with a new symbol.
+
+expression内の定義の全てを拡張することは難しい
+
+難しさの原因:
+- the bound identier in the defition of formula is not the same as the one declared in the constant declaration.
+
+expression内の定義の全てを拡張するの意味を定義するもっとも簡単な方法：
+- replace variable new symbol `v_743` where `v_743` is an identier that cannot be used anywhere else
+
+再帰的な定義は、定義の拡張においては問題ではない。
+(Recursive denitions are not a problem for complete expansion of definitions)
+
+なぜなら再帰的定義の左辺と右辺に表れるbound indentifierは同じsymbolではないから。(実際のところは `CHOOSE` 使ってるから)
