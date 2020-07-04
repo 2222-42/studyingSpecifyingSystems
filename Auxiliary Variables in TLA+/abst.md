@@ -122,3 +122,39 @@ expression内の定義の全てを拡張するの意味を定義するもっと�
 (Recursive denitions are not a problem for complete expansion of definitions)
 
 なぜなら再帰的定義の左辺と右辺に表れるbound indentifierは同じsymbolではないから。(実際のところは `CHOOSE` 使ってるから)
+
+## 2.3 Specication MinMax2
+
+> The specication of our system in module MinMax1 uses the variable y 
+to remember the set of all values that the user has input.
+
+> Module MinMax2 species the same user/server interaction that 
+remembers only the smallest and largest values input so far, 
+using the variables min and max.
+
+Module MinMax1ではy を使って、ユーザーが入力した全ての値の集合を記憶していた。
+Module MinMax2では、同じユーザー/サーヴァーの相互作用は、入力された最小と最大の値のみを保存する。保存については変数minとmaxを使う。
+
+The philosophically correct specification, which hides the internal variables min and max, is \EE min; max : Spec .
+
+#### 疑問点
+
+なんで今度は`\EE`が導入できるの？
+
+MinMax1で`\EE y: Spec`と書けなかった理由は、
+`y` が `Spec`の定義の中に表れていて、式がillegalになるからということだった。
+
+MinMax2での`min`と`max`はどうか？
+
+変数としては表れている。
+
+yの初期値は`{}`と空集合で定義されている。
+minとmaxの初期値はInfinityとして独自に定義している。
+
+`setMin(y')`などがなくなった。
+結局`x = min'`などで見ると、y'を使っているのと代わりないように思える。
+
+`y`は集合で、要素はintであった。
+`min`や`max`はintもしくはInfinity, MinusInfinity。
+
+-> やっぱり、どこで本質的に違いがうまれているのかがわからないから、次節の2.4まで読まないとわからないのかもしれない。
