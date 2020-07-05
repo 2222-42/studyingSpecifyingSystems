@@ -158,3 +158,43 @@ minとmaxの初期値はInfinityとして独自に定義している。
 `min`や`max`はintもしくはInfinity, MinusInfinity。
 
 -> やっぱり、どこで本質的に違いがうまれているのかがわからないから、次節の2.4まで読まないとわからないのかもしれない。
+
+## 2.4 The Relation Between the Two Specications
+
+`Spec2` indicates the `Spec` of `MinMax2`.
+
+(2.5) `\EE y: Spec \<equiv> (\EE min, max : Spec2)`
+
+- (2.6) `(\EE y : Spec1) => (\EE min, max : Spec2)`
+- (2.7) `(\EE min, max : Spec2) => (\EE y : Spec1)`
+
+(2.6):
+asserts of a behavior `\sigma` that
+  if there exists some way of assigning values to `y` in the states of `\sigma` to make it satisfy `Spec1`, 
+  then `\sigma` satises `\EE min, max : Spec2`
+
+changing the values of y in the states of \sigma doesn't affect whether it satisfies.
+
+it suffices to show that any behavior `\sigma` that satises `Spec1` also satises `\EE min, max : Spec2`
+
+i.e., 
+- (2.8) `Spec1 => (\EE min,max : Spec2)`
+
+to find explicit expressions `min` and `max` such that, if in each state of a behavior
+we assign to the variables `min` and `max` the values of `\bar{min}` and `\bar{max}` in that
+state, then the resulting behavior satises `Spec2`.
+
+instantiate:
+
+`M == INSTANCE MinMax2 with min <- BAR{min}, max <- BAR{max}`
+
+the instance statement theorefore allow us to write the theorem:
+
+`THEOREM Spec => M !Spec`
+
+- We can write a TLA+ proof of this theorem and check it with the TLAPS theorem prover.
+- We can also check this theorem by crateing a model.
+
+Before do the above, we have to determine what the expressions `\bar{min}` and `\bar{max}` are in the instance statement.
+
+

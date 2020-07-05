@@ -41,6 +41,16 @@ Next == InputNum \/ Respond
 vars == <<x, turn, y>>
 
 Spec == Init /\ [][Next]_vars
+
+------------------------------------
+Infinity == CHOOSE n : n \notin Int
+MinusInfinity == CHOOSE n : n \notin (Int \cup {Infinity})
+
+M == INSTANCE MinMax2 
+        WITH min <- IF y = {} THEN Infinity ELSE setMin(y),
+             max <- IF y = {} THEN MinusInfinity ELSE setMax(y)
+
+THEOREM Spec => M!Spec
 =============================================================================
 \* Modification History
 \* Created Mon Jun 29 12:35:58 JST 2020 by daioh
