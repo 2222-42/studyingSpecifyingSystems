@@ -197,4 +197,67 @@ the instance statement theorefore allow us to write the theorem:
 
 Before do the above, we have to determine what the expressions `\bar{min}` and `\bar{max}` are in the instance statement.
 
+## 2.5 Renement In General
 
+Suppose that:
+
+- x: the set of externally visible variables
+- y, z: the sets of internal variables
+
+Spec with internal variables hidden:
+- `\EE y: Spec1`
+- `\EE z: Spec2`
+
+To verify `\EE y: Spec1` implements `\EE z: Spec2`,
+
+First, show that 
+- for each behavior satisfying `Spec1`, 
+- there is some way to assign values of the variables `z` in each state 
+  - so that the resulting behavior satises `Spec2`.
+
+How do this?:
+
+- by explicitly specifying those values of `z` in terms of the values of `x` and `y`.
+  - for each `z_i`, define an expression `\bar{z_i}` in terms of `x` and `y`
+  - show that `Spec1` implements `\bar{[[Spec2]]}`
+    - by expanding all definitions in `Spec2` and substituting `z_1 <- \bar{z_1}`, ..., `z_p <- \bar{z_p}`
+
+What they are called?:
+
+- This substitution is called `refinement mapping`
+- "Spec1 implements Spec2 under the refinement mapping"
+
+Next, add the new instance statement in the Module of Spec1, s.t.,:
+
+`Id == INSTANCE Mod2 WITH z1 <- newZ1, ... zp <- newZp`
+
+.
+
+And finally, add the theorem, s.t., :
+
+`THEOREM Spec => Id!SPec2`
+
+.
+
+> it is sometimes the case that \EE y : Spec1 implements \EE z : Spec2
+but there does not exist a renement mapping under which Spec1 implements
+Spec2.
+
+まじ？
+
+> it is almost always possible to construct the necessary
+renement mapping by adding auxiliary variables to Spec1
+
+補助変数が必要になるわけだ。
+
+`x`と`y`で代入する変数が定義できないなら、新たな補助変数`a`を導入するまでよ。
+
+1. add a new auxiliary variables to `Spec1` s.t. `\EE a : Speca1^a` is equivalent to `Spec1`. 
+2. Showing that `\EE y, a : Speca1^a` implements `\EE z : Spec2` 
+3. this means that shows that `\EE y : Spec1` implements `\EE z : Spec2`
+
+導入する三つ補助変数(再掲)
+
+- history variables
+- prophecy variables
+- stuttering variables
