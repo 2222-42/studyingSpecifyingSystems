@@ -261,3 +261,23 @@ renement mapping by adding auxiliary variables to Spec1
 - history variables
 - prophecy variables
 - stuttering variables
+
+# 3 History Variables
+
+## 3.1 Equivalence of MinMax1 and MinMax2
+
+> We found a renement mapping under which Spec1 implements Spec2.
+> To prove the converse implication, find a renement mapping under which Spec2 implements Spec1.
+
+> in a behavior of Spec2, the variables min and max record only
+the smallest and largest input values. There is no way to reconstruct the set
+of all values input from the variables of MinMax2
+> there is no refinement mapping under which Spec2 implements Spec1.
+> To solve this problem, we write another spec Spec_2^h that is the same as Spec2
+> More precisely, if we hide h in Spec_2^h, then we get a specication that's equivalent to Spec2. 
+Expressed mathematically, this means \EE h : Spec^h_2 is equivalent to Spec2.
+
+> In particular, the value of h records information about previous values of the variable x , but
+does not affect the current or future values of x or any of the other variables turn, min, and max of Spec2.
+
+see MinMax2H.tla
