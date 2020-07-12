@@ -281,3 +281,77 @@ Expressed mathematically, this means \EE h : Spec^h_2 is equivalent to Spec2.
 does not affect the current or future values of x or any of the other variables turn, min, and max of Spec2.
 
 see MinMax2H.tla
+
+## 3.2 Disjunctive Representation
+
+We add a history variable `h` to a specication by 
+- conjoining `h` = `expInit` to its initial predicate and
+  - can contain the spec's variables
+- (`h' = expA`) to each subaction `A` of its next-state action,
+  - can contain the spec's variables
+
+上記を適切にするためには、`subaction`が何かを明確に述べる必要がある。
+
+NextはNext自身のsubactionと考えられ、また等しく、それはTLAPSで証明できる。
+
+```
+THEOREM NextH = /\ InputNum \/ Respond
+                /\ \/ (turn = "input") /\ (h' = h)
+                   \/ (turn = "output") /\ (h' = h \cup {x})
+```
+
+subactionの定義のために、`disjunctive representation`(選言表現)を導入する
+
+Nのdisjunctive representationとは、選言(`disjunctive`, `\/`)と`\E k \in K`のみを使いsubactions A1, ..., Anで Nを書くことである。
+
+```
+B \/ C \/ D \/ (\E i \in S, j \in T:
+                  (\E q \in U: E) \/ (\E r \in W: F)
+                )
+```
+
+数あるDisjunctive Representation の中の1つとして、
+`B`, `C \/ D`, `\E q \in U : E `, そして `F` がsubactionsだとする。
+
+dijunction prepresentationのそれぞれのsubactionは`context`を持っている。
+- contextは`<k; K>`で表現する。`k`はidentifiersのn組、`K`は表現のn組とする。
+- contextの中のidentifiersの組は、Aが属するscopeの束縛している量化子のidentifiersになる。
+
+- `B` : `<>`
+- `C \/ D` : `<>`
+- `\E q \in U : E ` : `<i, j; S, T>`
+- `F` : `<i, j, r; S, T, W>`
+
+If `<k;K>` is the empty context `<;>`, we let `\E <k;K> : F` and `\A <k;K> : F` equal `F`.
+(Since unbounded quantication seldom occurs in specications, we will not discuss this further.)
+
+#### 疑問
+
+結局subactionはどう定義されたのか？
+
+Disjunctive Representation で区切られた一つのformulaのこと？
+
+### Theorem 1 (History Variable)
+
+Let `Spec` equal `Init /\ [][Next]vars` and 
+let `Spec^h` equal `Init^h /\ [][Next^h]vars^h`, where:
+
+- `Init^h` equals `Init /\ (h = exp_{Init})`, for some expression expInit that may
+contain the specication's (unprimed) variables.
+- `Next^h` is obtained from `Next` by replacing each subaction `A` of a disjunctive
+representation of `Next` with `A /\ (h' = exp_A)` , for some expression `exp_A`
+that may contain primed and unprimed specication variables, identiers
+in the context of `A`, and constant parameters.
+- `vars^h` equals `<vars; h>`
+
+Then `Spec` is equivalent to `\EE h : Spec^h` .
+
+### History Variableとは何か
+
+上記の定理の仮定に入っている。
+
+仮定は非常に統語論的なものである: 
+- `Init^h`, `Next^h`, `vars^h`の定義における条件と、
+- `exp_{Init}`, `exp_A`に表れる変数とidentifirersとに関する条件
+
+変数とidentifiersが表現`exp`の中にあらわれるというのは、そのexpの表現に表れるものの全ての定義の拡張のことである
