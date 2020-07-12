@@ -27,6 +27,12 @@ M == INSTANCE MinMax1
         WITH y <- h
 
 THEOREM SpecH => M!Spec
+
+THEOREM NextH = /\ InputNum \/ Respond
+                /\ \/ (turn = "input") /\ (h' = h)
+                /\ \/ (turn = "output") /\ (h' = h \cup {x})
+
 =============================================================================
 \* Modification History
+\* Last modified Sun Jul 12 11:11:09 JST 2020 by daioh
 \* Created Wed Jul 08 14:00:54 JST 2020 by daioh
