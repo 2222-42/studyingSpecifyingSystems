@@ -30,9 +30,10 @@ THEOREM SpecH => M!Spec
 
 THEOREM NextH = /\ InputNum \/ Respond
                 /\ \/ (turn = "input") /\ (h' = h)
-                /\ \/ (turn = "output") /\ (h' = h \cup {x})
-
+                   \/ (turn = "output") /\ (h' = h \cup {x})
+BY DEF NextH, Next, InputNum, Respond, InputNumH, RespondH
 =============================================================================
 \* Modification History
+\* Last modified Sun Jul 12 11:25:13 JST 2020 by shanada
 \* Last modified Sun Jul 12 11:11:09 JST 2020 by daioh
 \* Created Wed Jul 08 14:00:54 JST 2020 by daioh
