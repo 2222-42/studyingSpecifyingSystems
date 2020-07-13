@@ -355,3 +355,47 @@ Then `Spec` is equivalent to `\EE h : Spec^h` .
 - `exp_{Init}`, `exp_A`に表れる変数とidentifirersとに関する条件
 
 変数とidentifiersが表現`exp`の中にあらわれるというのは、そのexpの表現に表れるものの全ての定義の拡張のことである
+
+## 3.3 Equivalence of Next-State Actions
+
+When adding an auxiliary variable, 
+it is often useful to rewrite a specication `Spec`
+,that is, 
+- to replace `Spec` with a different but equivalent formula.
+- to rewrite the next-state action `Next`, 
+  - which is done by rewriting one or more of the subactions in a disjunctive representation of `Next`.
+
+A and B are equivalent formulas
+ -> easy to replace, but it is too stringent a requirement.
+
+AとBが等しいという条件は厳しすぎる要求であり、
+型に関する条件を緩和すると大凡できるから、
+以下のような `Inv` を導入することで、サブアクションの等しさを示す。
+
+### Theorem 2 (Subaction Equivalence) 
+
+仮定:
+
+- Let `A` be a subaction with context `<k;K>` in a disjunctive representation of the next-state action of a specication `Spec` with tuple `vars` of variables, 
+- let `Inv` be an invariant of `Spec`, and 
+- let `B` be an action satisfying:
+
+  (3.2) `Inv => \A <k;K> : A \equiv B`
+
+結論：
+
+Then `Spec` is equivalent to the specication 
+  obtained by replacing `A` with `B` 
+  in the next-state action's disjunctive representation.
+
+補足：
+
+3.2はaction formulaで、TLAPSで証明することができる。TLCではチェックできない。
+
+また、`Inv`が単純な型のインバリアントだと、証明も難しくはない。
+
+### TLCでの等しさの証明について
+
+両方のspecificationがお互いを導出することを確認することで、TLCで等しさを直接確認することができる。
+片方のSpecが他方のを含意することを示すためには、
+`Spec` をbehavioral specificationとして、 `SpecB` をチェックする性質として、TLCを走らせればよい。
