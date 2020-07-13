@@ -403,3 +403,39 @@ Then `Spec` is equivalent to the specication
 `Spec` をbehavioral specificationとして、 `SpecB` をチェックする性質として、TLCを走らせればよい。
 
 ## 3.4 Discussion of History Variables
+
+History Variablesについての議論
+
+### 示すこと(これまでの話)
+
+Specification `S` がある性質`P`を満たす、つまり`S` は `P` を含意することを示したい。
+TLCが確認できる正しさの一般的な形式としては、一方が他方を含意することである。
+
+また、Specification `S` が高階、より抽象的なSpecification `T`を含意することを示したい。
+
+高階のSpecを含意することを示す方法は、
+Refinement Mappingを見つけることである。
+どのようなMappingかというと、Sのvariablesの値からTのvariablesの値への関数である。
+
+しかし、Tがそのその状態において、Sによって忘れられた情報を保持している場合は、Refinement Mappingを見つけることができない。
+
+どうやって、SがTを含意することを示すか。
+
+1. `S`に history variable `h`を加え、`S^h`を手に入れる
+2. `S^h` が `T` を含意するようなRefinement Mappingを見つける
+3. `\EE h : S^h` は `S` に等しいから、`S`は`T`を含意すると言える。
+
+### History Variable に関する反対意見
+
+Spec `T` が実装 `S` において保存されてはならない過去の情報を保存しているならば、
+`T` は良い高レベルのspecificationではない、という意見について
+
+でも、この手の過去に関する情報は、高レベルのspecificationを、単純にしうる場合がある。
+
+Refinement Mappingを明示的に構成していない場合においても、
+Specification が満たす事項を示したいような性質について述べるために、
+Specification SにHistory Variableを追加することがある。
+(高レベルのものについては実装しないから)
+
+e.g., あるactionが起きたことを記録するHistory Variableを追加しておけば、
+Sがある種のactionは他のよりも先に起きたことを要求しているという性質をinvariantとして表現することができる。
