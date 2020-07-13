@@ -358,6 +358,8 @@ Then `Spec` is equivalent to `\EE h : Spec^h` .
 
 ## 3.3 Equivalence of Next-State Actions
 
+### 補助変数を追加する時にやっているSpecの書き換えについて
+
 When adding an auxiliary variable, 
 it is often useful to rewrite a specication `Spec`
 ,that is, 
@@ -399,3 +401,5 @@ Then `Spec` is equivalent to the specication
 両方のspecificationがお互いを導出することを確認することで、TLCで等しさを直接確認することができる。
 片方のSpecが他方のを含意することを示すためには、
 `Spec` をbehavioral specificationとして、 `SpecB` をチェックする性質として、TLCを走らせればよい。
+
+## 3.4 Discussion of History Variables
