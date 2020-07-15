@@ -40,6 +40,8 @@ vars == <<x, turn, min, max>>
 
 Spec == Init /\ [][Next]_vars
 
+LSpec == Init /\ [][Next]_vars /\ WF_vars (Respond)
+
 =============================================================================
 \* Modification History
 \* Created Sat Jul 04 13:20:22 JST 2020 by daioh

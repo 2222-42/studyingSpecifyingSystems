@@ -439,3 +439,34 @@ Specification SにHistory Variableを追加することがある。
 
 e.g., あるactionが起きたことを記録するHistory Variableを追加しておけば、
 Sがある種のactionは他のよりも先に起きたことを要求しているという性質をinvariantとして表現することができる。
+
+## 3.5 Liveness
+
+"every input should produce an output"といった、可能になったら動けという要求はLivenessと呼ばれ、
+それをspecificationsに導入するのは、式`Spec`にWeak Fairness`WF_vars (Respond)`を付け加えることで達成される。
+
+追加した`LSpec`の等しさの証明についてはMinMax1からMinMax2の方は、前と同様に、簡単にできるが、MinMax2からMinMax1の証明については、history variableを追加する必要がある。
+
+MinMax2Hに`HLSpec == SpecH /\ WF_vars (Respond)`を追加する。
+
+`LSpec` と `\EE h : HLSpec`の等しさの証明は、
+`Spec` と `\EE h : SpecH`の等しさからくる。
+
+0. `Spec` は `\EE h : SpecH`に等しいから、
+1. `Spec /\ WF_vars (Respond)` は `(\EE h : SpecH) /\ WF_vars (Respond)` に等しい
+2. `\EE h : SpecH) /\ WF_vars (Respond)` は `\EE h : (SpecH /\ WF_vars (Respond))`に等しい。なぜなら、`WF_vars (Respond)`に`h`は表れていないから。
+3. `LSpec`と`HLSpec`の定義、1と2より、同値性が示せた。
+
+これによてわかることは、Safety Partにhistory variableを付け加えても、Liveness条件は同じであること。
+
+`WF_vars (Respond)`は少し不思議に思えるかもしれない。
+なぜなら、`Respond`は`SpecH`のsubactionではないから。
+
+しかし、このhistory variableの追加によって得られたSpecは不思議ではない。
+(i)`Respond`は`RespondH`が可能になった時、かつその時に限り、
+(ii)`NextH`stepが`Respond`stepになるのは、`RespondH`stepの時かつその時であるから、
+よって、
+`HLSpec`は`InitH /\ [][NextH]_varsH /\ WF_vars (Respond)`という形になる。
+
+`HLSpec`のこの一般的ではない性質は、TLCのModel checkerにも、specificationに関する推論能力にも悪影響を及ぼさない。
+history variable `h`を含むRefinement Mappingについても前と同様に作れる。

@@ -42,6 +42,8 @@ vars == <<x, turn, y>>
 
 Spec == Init /\ [][Next]_vars
 
+LSpec == Init /\ [][Next]_vars /\ WF_vars (Respond)
+
 ------------------------------------
 Infinity == CHOOSE n : n \notin Int
 MinusInfinity == CHOOSE n : n \notin (Int \cup {Infinity})
@@ -51,6 +53,8 @@ M == INSTANCE MinMax2
              max <- IF y = {} THEN MinusInfinity ELSE setMax(y)
 
 THEOREM Spec => M!Spec
+
+THEOREM LSpec => M!LSpec
 =============================================================================
 \* Modification History
 \* Created Mon Jun 29 12:35:58 JST 2020 by daioh

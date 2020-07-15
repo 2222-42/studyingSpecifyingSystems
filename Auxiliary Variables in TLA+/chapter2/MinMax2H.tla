@@ -23,6 +23,8 @@ varsH == <<vars, h>>
 \* Spec == Init /\ [][Next]_vars
 SpecH == InitH /\ [][NextH]_varsH
 
+HLSpec == SpecH /\ WF_vars (Respond)
+
 M == INSTANCE MinMax1
         WITH y <- h
 
