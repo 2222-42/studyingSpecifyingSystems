@@ -470,3 +470,17 @@ MinMax2Hに`HLSpec == SpecH /\ WF_vars (Respond)`を追加する。
 
 `HLSpec`のこの一般的ではない性質は、TLCのModel checkerにも、specificationに関する推論能力にも悪影響を及ぼさない。
 history variable `h`を含むRefinement Mappingについても前と同様に作れる。
+
+# 4 Prophecy Variables
+
+the fundamental task of verification is
+  to show that the specification Spec1 of an implementation satisfies a specication Spec2 of 
+    what the implementation is supposed to do
+
+It is needed to find a refinement mapping to show that Spec1 implements Spec2
+
+- history variable: remembers the past
+  - when Spec2 remembers previous events longer than it has to.
+- prohecy variable: predicts the future
+  - when Spec2 makes decisions before it has to.
+
