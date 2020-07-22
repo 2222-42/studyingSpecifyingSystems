@@ -484,3 +484,83 @@ It is needed to find a refinement mapping to show that Spec1 implements Spec2
 - prohecy variable: predicts the future
   - when Spec2 makes decisions before it has to.
 
+## 4.1 One-Prediction Prophecy Variables
+
+テーマ: how to add a simple prophecy variable that makes a single prediction at a time.
+
+以下のような、ある表現`Pred_A(i)`と定数集合`\Pi`に対して、subaction Aを含むnext-state関係の選言的な表現(disjunctive representation)があると仮定する。
+`A => ( \E i \in \Pi : Pred_A(i) )`
+
+この式は以下の式に等しい：
+`A \equiv A /\ (\E i \in \Pi : Pred_A(i))`
+。これは、任意のStep `A` は、`\Pi` に属するある`i`に対して、`A /\ Pred_A(i)` であることを意味する。
+
+one-prediction prophecy variable `p`を導入する。
+  この値は`i`であり、次の `A` stepが存在する場合に、上記の`A`stepのものである。
+    この`i`は一意ではない。
+
+`p`には次のようにして意味を与える、
+- subaction `A`をsubaction `A^p`で置き換える。
+- `A^p`は以下のようにして定義される。
+  - `A^p == A /\ Pred_A(p) /\ Setp`
+  - `Setp` は`p'`の値を決めるところのものである
+
+propehncy variable `p` を追加することが他の変数のすべての振る舞い(元のSpecがやる)を許可するのを、保証するために、
+`p` が常に `\Pi` の任意の値を取りうることを保証しなければならない
+-> どうやって行うか。
+1. `p` の初期化で、`\Pi`の任意の要素を取らせ
+2. `p` の変更では、`\Pi`の任意の要素への変更のみによってなさせる
+
+だから、初期化Initは `Init /\ (p \in \Pi)`にし、`Setp` は `p' \in \Pi`に等しくさせるようにし、そして
+`A^p == A /\ Pred_A(p) /\ (p' \in \Pi)`となる。
+
+`p` によっては予言されないような効果を持っているnext-state relationの別のsubactionについては、
+`A^p` が変更させないようにする、つまり：
+`A^p == A /\ p' = p`
+。
+
+例：以下のような単純なシステムを考える
+- 整数`i`の送信を、変数`x`を`i`にすることで表現し
+- 値を受け取ったことを、変数`x`を非整数にすることで表現する
+
+SendInt2というSpecificationでは、受取を、内部の変数`z`に次に送信する値を割り当てることで表現してみる。
+
+内部変数を使わずにもっとシンプルに書く方法もある。SendInt1がそれ。
+
+SendInt1のSpec、Spec1が`\EE z: Spec2`と等しいことを示したい。以下の2つを示す必要がある宇。
+- `\EE z: Spec2 => Spec1`
+  - `Spec2 => Spec1`は自明で、簡単にTLCのモデル検査で、Intに対して有限の部分集合をモデルにやればよい。
+- `Spec1 => \EE z: Spec2`
+  - `\bar{z}`に入れることができるのは、`x`を含むものだけのようなRefinement Mappingは、明らかに、ない。
+    - `x`が`NotInt`に等しい場合、`z`は任意の整数と等しくなる。
+    - だから、`x`の値からの関数の値を表現する方法がない。
+
+SendInt2の`z`は、実際に送信する前に、送信される値を予言するよう使われている。
+Refinement Mappingに`\bar{z}`の値を定義できるように、予言するprophecy variable `p`を付け加えよう。
+
+予言なんだから、送る前に値を予言しないといけないから、以下の形式になるはず
+- `A^p == A /\ Pred_A(p) /\ (p' \in \Pi)`
+
+このAにあたるのが`Send`。
+
+`Pred_{Send}(p)`が`x' = p`と等しければ、`p`が正しく予言したことになる。
+だから
+- `PredSend(i) == x' = i` と定義する。
+  - これのSpecでの定義は、`p`の宣言の前であり、`p`を使わずに定義されていることを保証する。
+
+これによって、サブアクションに対する条件は以下の通りに定義される:
+`Send => ( \E i \in \Pi : PredSend(i) )`
+。
+
+これにより、アクションに対する定義は次のようになる。
+`SendP == Send /\ PredSend(i) /\ (p' \in Pi)`
+
+Refinment Mappingとしては、つまり、`x`が`NotInt`に等しい場合、`z`は任意の整数と等しくなる、という条件を満たす必要がある。
+
+補足：
+- SendInt2が送信する前であったとしても、次に送信される値を予言する
+  - いつ受信されるかよりもいつ送信されるか
+- Rcvアクションが実行されるまで、どうやって予言を延期するのかについては後で議論するとのこと。
+
+Theoremで示したいことは、SpecPが、Refinement Mappingの下で、SendInt2のSpecを実装していること。
+これはTLCで時相プロパティ`SI2!Spec`をチェックしつつ、時相Specification `SpecP`を満たすモデルを作ることで確認できる。
