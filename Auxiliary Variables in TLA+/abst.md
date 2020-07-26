@@ -489,10 +489,10 @@ It is needed to find a refinement mapping to show that Spec1 implements Spec2
 テーマ: how to add a simple prophecy variable that makes a single prediction at a time.
 
 以下のような、ある表現`Pred_A(i)`と定数集合`\Pi`に対して、subaction Aを含むnext-state関係の選言的な表現(disjunctive representation)があると仮定する。
-`A => ( \E i \in \Pi : Pred_A(i) )`
+(4.1) `A => ( \E i \in \Pi : Pred_A(i) )`
 
 この式は以下の式に等しい：
-`A \equiv A /\ (\E i \in \Pi : Pred_A(i))`
+(4.2) `A \equiv A /\ (\E i \in \Pi : Pred_A(i))`
 。これは、任意のStep `A` は、`\Pi` に属するある`i`に対して、`A /\ Pred_A(i)` であることを意味する。
 
 one-prediction prophecy variable `p`を導入する。
@@ -502,7 +502,7 @@ one-prediction prophecy variable `p`を導入する。
 `p`には次のようにして意味を与える、
 - subaction `A`をsubaction `A^p`で置き換える。
 - `A^p`は以下のようにして定義される。
-  - `A^p == A /\ Pred_A(p) /\ Setp`
+  - (4.3)`A^p == A /\ Pred_A(p) /\ Setp`
   - `Setp` は`p'`の値を決めるところのものである
 
 propehncy variable `p` を追加することが他の変数のすべての振る舞い(元のSpecがやる)を許可するのを、保証するために、
@@ -512,11 +512,11 @@ propehncy variable `p` を追加することが他の変数のすべての振る
 2. `p` の変更では、`\Pi`の任意の要素への変更のみによってなさせる
 
 だから、初期化Initは `Init /\ (p \in \Pi)`にし、`Setp` は `p' \in \Pi`に等しくさせるようにし、そして
-`A^p == A /\ Pred_A(p) /\ (p' \in \Pi)`となる。
+(4.4)`A^p == A /\ Pred_A(p) /\ (p' \in \Pi)`となる。
 
 `p` によっては予言されないような効果を持っているnext-state relationの別のsubactionについては、
 `A^p` が変更させないようにする、つまり：
-`A^p == A /\ p' = p`
+(4.5)`A^p == A /\ p' = p`
 。
 
 例：以下のような単純なシステムを考える
@@ -564,3 +564,46 @@ Refinment Mappingとしては、つまり、`x`が`NotInt`に等しい場合、`
 
 Theoremで示したいことは、SpecPが、Refinement Mappingの下で、SendInt2のSpecを実装していること。
 これはTLCで時相プロパティ`SI2!Spec`をチェックしつつ、時相Specification `SpecP`を満たすモデルを作ることで確認できる。
+
+## 4.2 One-Prediction Prophecy Variables in General
+
+a one-prediction prophecy variableの説明を2つの方法で一般化する
+
+第一の一般化: 
+a prophecy variableに、1つ以上のアクションについて予言することを許す
+  (4.3)`A^p == A /\ Pred_A(p) /\ Setp`の形式の`A^p`によって、1つ以上のdisjunctive representationのsbuaction Aを置き換えることによって
+こうすると、各subactionについて、それぞれのstepについて次のstepで起きることを予言できるようになる。
+
+もうちょいエレガントな表現をする、
+- `Setp`を`A`に依存させて、
+- dijunctive representation の各action `A`を、以下で定義される、`A^p`で置き換えることによって
+  - (4.6) `A^p == A /\ Pred_A(p) /\ Setp_A`
+    - `A` はなんの予言も作られていないもの
+    - `Pred_A(p)` は`TRUE`の表現
+    - (4.4)と(4.5)は`Setp_A`を以下のいずれかで定義することによって、これに置き換えられる
+      - (4.7)
+        - (a) `Setp_A == p' = p` (`Pred_A(p)` が`TRUE`の表現の場合(つまり、`p`は`A`についての予言ではない場合))
+        - (b) `Setp_A == p' \in \Pi` 
+
+これが一般的であるのは、
+  それ`p`によって作られた予言を使っていないactionに、新たな予言を作ることを、許しているから。
+
+第二の一般化:
+  非-空なcontextを持っているdisjunctive representationのsubactionを扱う必要がる。
+
+context `<<k; K>>`を持っているsubaction `A`に対して、条件(4.1) `A => ( \E i \in \Pi : Pred_A(i) )`はidentifiers `k`をもっている。
+この条件は、`K`の中の対応する集合に含まれるそれぞれのidentifiersのvalueに対して、成り立つ。
+
+だから、(4.1) `A => ( \E i \in \Pi : Pred_A(i) )`を一般化すると、
+
+(4.8) `\A <<k; K>>:A => (\E i \in \Pi : Pred_A(i))`
+
+になる。
+
+(リマインド: contextは`<k; K>`で表現する。`k`はidentifiersのn組、`K`は表現のn組とする。)
+
+(4.8) は、すべてのstateのpairにつちえ成り立つ必要はなく、元の`Spec`を満たすようなbehaviorの中に表れるsatesのpairについてだけなりたてばよい。だから、(4.1)は次のように一般化される。
+
+(4.9) `Spec => [] [\A <k;K> : A => (\E i \in \Pi : Pred_A(i))]_vars`
+
+TLCはこれをチェックすることが可能。
