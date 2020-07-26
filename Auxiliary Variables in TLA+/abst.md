@@ -607,3 +607,32 @@ context `<<k; K>>`を持っているsubaction `A`に対して、条件(4.1) `A =
 (4.9) `Spec => [] [\A <k;K> : A => (\E i \in \Pi : Pred_A(i))]_vars`
 
 TLCはこれをチェックすることが可能。
+
+## 4.3 Prophecy Array Variables
+
+Module `SendInt`とは異なり、非特定のconstantな集合 Data を用意して、そこで考える。
+
+Module `SendSet` では、`y`に新たなデータ要素を追加していく。
+- `y`は内部変数で、
+- `x`は外から見れる変数と考える。
+
+システムによくあるのが`undo`オペレーション。
+  `y`から要素を消すようなもの
+
+Module `SendSetUndo`では、`Undo(S)`というactionを用意、また、next actionとして Module `SendSet`のNext もしくは`Undo(S)`をとる。
+  `Undo(S)` は、`y`の非-空な部分集合Sを選んで、それを消す操作
+
+`SendSet`の`Spec` と `SendSetUndo`の`SpecU` とは変数 `x` については振る舞いは一緒。
+だから、`\EE y: Spec` と `\EE y: SpecU` とは等しい。
+
+`Spec` が `SpecU`を含意することを示すのは簡単。
+  なぜなら、`Next`で許されているようなactionは`NextU`で許されているため、
+  `\bar{y}`が`y`と等しいように定義したRefinement Mappingがあるから。
+
+`SpecU` が `Spec`を含意するようなRefinement Mappingを構成するために、
+  `\bar{y}`を以下のように定義しなければならない
+    - それはdata value `d`を含む、iff. 、値が`Send`Stepによって送信された場合
+      - `Undo` Stepによって、値が忘れられたときではなくて
+
+これは予言を含む、
+  `d`が`y`に追加されたとき、それがのちに送信されるか、もしくは"undone"されるか。
