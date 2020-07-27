@@ -610,6 +610,8 @@ TLCはこれをチェックすることが可能。
 
 ## 4.3 Prophecy Array Variables
 
+### `Undo`操作のあるシステムについて
+
 Module `SendInt`とは異なり、非特定のconstantな集合 Data を用意して、そこで考える。
 
 Module `SendSet` では、`y`に新たなデータ要素を追加していく。
@@ -627,12 +629,120 @@ Module `SendSetUndo`では、`Undo(S)`というactionを用意、また、next a
 
 `Spec` が `SpecU`を含意することを示すのは簡単。
   なぜなら、`Next`で許されているようなactionは`NextU`で許されているため、
-  `\bar{y}`が`y`と等しいように定義したRefinement Mappingがあるから。
+  `\overline{y}`が`y`と等しいように定義したRefinement Mappingがあるから。
 
 `SpecU` が `Spec`を含意するようなRefinement Mappingを構成するために、
-  `\bar{y}`を以下のように定義しなければならない
+  `\overline{y}`を以下のように定義しなければならない
     - それはdata value `d`を含む、iff. 、値が`Send`Stepによって送信された場合
       - `Undo` Stepによって、値が忘れられたときではなくて
 
 これは予言を含む、
   `d`が`y`に追加されたとき、それがのちに送信されるか、もしくは"undone"されるか。
+
+### prophercy array variable の追加とそのSpecの定義
+
+prophercy array variable `p`を`SpecU`に追加、
+  `p`は予言を作る
+    `d`が`y`に付け加えられたときに、`p[d]`が"send"か"undo"いずれに設定されるかの
+
+だから、可能な予言の集合`Pi`は以下のように定義される
+- `Pi == {"send", "undo"}`
+。
+
+これにより、`p \in [y -> Pi]`は、`p`を付け加えることによって得られるspec `SpecUP`のinvariantとなる。
+
+変数`p`は`y`の任意の`d`に対して予言`p[d]`を作るので、`p`は予言の配列を作っている。
+  (この配列は「ダイナミック」である、なぜなら、`y`の値は変わりうるから)
+
+spec `SpecUP`を定義しよう。
+- disjunctive relationのsubaction Aを置き換えて定義するのだが、
+- (4.6)とは異なっており、以下のように定義される
+  - (4.10) `A^p == A /\ Pred_A(p) /\ NewPSet_A`
+- 条件(4.9)に該当するような条件が必要である
+  - `Pred_A(p)`を真にするような`p`の可能な値があることを主張するために
+  - `p`は`Pi`の要素ではなく、`[Dom -> Pi]`となる関数であり、`Dom`は変わりうる
+  - よって、我々の例では以下のように定義される。
+    - (4.11) `SpecU => [] [\A <k;K> : A => (\E f \in [Dom -> \Pi] : Pred_A(f))]_vars`
+
+`NextU`についても定義する。
+- `Choose`
+  - `p`は`Choose`についての予言をなにも作らない(`Pred_{Choose}(p)`は真)
+    - `PredChoose(p) == TRUE`
+  - `Choose^p`は、`p'[d]`が`Pi`の任意の値になることを許容する
+    - `NewPSetChoose(p) == {f \in [Dom' -> Pi] : \A d \in Dom: f[d] = p[d]}`
+- `Send`
+  - 次のactionが`Send`であるなら`p`は予言しないと行けない。(`p[d] = "send`)
+    - `PredSend(p) == p[x'] = "send"`
+      - `x'`はactionによって送られる値
+  - `Send` actionは`Dom`から要素`d`を取り去る(`d` に関して作られた予言 `p`は消される)
+  - `Dom`の他のすべての要素については、`p[d]`の値は変わらずである。よって、以下のように定義される。
+    - `NewPSetSend(p) == {[d \in Dom' |-> p[d]]}`
+- `Rcv`
+  - 予言なし
+    - `PredRcv(p) == TRUE`
+  - `Dom`への変更なし
+    - `NewPSetRcv(p) == {p}` 
+- `Undo(S)`
+  - `p`が`S`のすべての要素が送信さないことを予言していた時に、`Undo(S)`は可能になる。
+    - `PredUndo(p, S) == \A d \in S : p[d] = "undo"`
+  - `p`が`Undo(S)`に関する予言を作った要素すべてについて、`Undo(S)`actionは`Dom`から取り除く
+    - `NewPSetUndo(p) == {[d \in Dom' |-> p[d]]}`
+
+これらによって、`SpecUP`を定義することができるようになる。
+  `InitUP`と`NextUP`を含めて、`A^p`のsubactionsの用語を用いて
+    (4.10)を使って
+  `p`の初期値は、一意な、ドメインが空なfunctionである。
+    - `[d \in {} |-> exp]`と書ける
+    - `<>`(empty sequence)の方が簡単に書ける。
+
+Refinement Mappingを作るよ
+  `SpecUP` が Module`SendSet` の `Spec`を実装するようなのを
+  `\overline{y}` を `p[d] = "send"`となるような`y`の要素`d`の集合にmappingするようなもの
+
+そんなInstanceを作ろう。
+そして、Theoremも作ろう。
+このTheoremはTLCでチェックできる。
+
+### subaction Aを含むnext-state関係の選言的な表現(disjunctive representation)の確認の問題点と経過悦作
+
+(4.11)について、それぞれのsubaction Aについて成り立つことを示さないといけない。
+
+```
+[] [
+  /\ Choose => (\E f \in [Dom -> \Pi] : PredChoose(f))
+  /\ Send => (\E f \in [Dom -> \Pi] : PredSend(f))
+  /\ Rcv => (\E f \in [Dom -> \Pi] : PredRcv(f))
+  /\ \A S \in SUBSET y : Undo(S) => (\E f \in [Dom -> \Pi] : PredUndo(f, S))
+]_vars
+```
+
+でもこの確認には問題がある
+  TLCはmodule `SendSetUndoP`に対して、specification `SpcU`の振舞いを持つことを許していない
+    なぜなら、そのspecは変数`p`についての振舞いを記述していないから
+
+解決策1:
+- moduleに変数`p`の宣言が表れる前のところで`==========`を挿入して、必要なモデルを作る
+
+解決策2:
+- module`SendSetUndo` に、変数`p`の宣言が表れる前に、すべての定義を写し
+- そのspecに対するモデルにおける条件のチェックをする
+  - これはエレガントではない。なぜなら、`SendSetUndo`のものではないから。
+
+良い解決策:
+- `SendSetUndoP`から定義を以下のmoduleに移す
+- 新たな`SendSetUndo`を拡張してかつ、`SendSetUndoP`によって拡張されるmodule
+
+これによって、条件を確認することができる
+
+けどこの解決策の実施は退屈だから、代わりにmodule `SendSetUndoP`に放り込む
+
+### 本節のまとめ
+
+Section 4.1では、
+- SendIntにおいては, one-prediction prophecy variable は次に送信される値を予言するのに使われていた
+- SnedInt2では、値が受信されるまで次に送信される値を選ばなかった
+
+このsectionで見たように
+- それが必要になるまで、予言を後回しするように、array prophecy variableを使っていた
+  - `Send` actionに`Dom`にempty setを設定するようにし
+  - `Rcv` actionに`Dom`を`{"on"}`に設定するようにした。

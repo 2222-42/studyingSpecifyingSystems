@@ -30,6 +30,11 @@ NextUP == ChooseP \/ SendP \/ RcvP \/ (\E S \in SUBSET y : UndoP(S))
 
 SpecUP == InitUP /\ [][NextUP]_varsP
 
+
+------------------------------------------------
+SS == INSTANCE SendSet WITH y <- {d \in y : p[d] = "send"}
+THEOREM SpecUP => SS!Spec
+
 =============================================================================
 \* Modification History
 \* Created Mon Jul 27 15:46:09 JST 2020 by daioh
