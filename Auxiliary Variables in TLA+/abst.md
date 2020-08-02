@@ -746,3 +746,118 @@ Section 4.1では、
 - それが必要になるまで、予言を後回しするように、array prophecy variableを使っていた
   - `Send` actionに`Dom`にempty setを設定するようにし
   - `Rcv` actionに`Dom`を`{"on"}`に設定するようにした。
+
+## 4.4 Prophecy Data Structure Variables
+
+最初は"one-prediction prophecy variable"をやった。
+-> "arbitrary prophecy-array variable"へと一般化した。
+-> "arbitrary prophecy data structure variable"へと更に一般化しよう。
+
+作ったもの`SendSeq`:
+- アイテムの集合ではなく、アイテムの列が選ばれるようなもの
+- 変数 `y` の値は、データアイテムの集合ではなく、データアイテムの列になる
+- 次に送られる値は、`y`の先頭にあるものになる。
+  - 選ばれた値は`y`の末尾に追加される。
+
+Undoも実装したもの `SendSeqUndo`
+- sequence `y` から任意の要素を取り除くようなアクション
+  - `RemoveEltFrom(i, seq)`を定義している; 
+    - `seq`からi番目の要素を除外する
+    - iは`1 <= i <= Len(seq)`とする。
+
+`SendU` は `\EE y: Spec` を実装していることを示したい
+- prophecy variable `p` は`y`の各要素が送信されるか"undone"になるかを予言する
+  - これは、`p`が`y` と同じ長さの`Seq({"send", "undo"})`の要素になるようにすることでなす
+- 各関数の中身についての確認
+  - `Choose^p`: `p`のtailに"send"もしくは "undo"を追加
+  - `Send^p`: `p`の先頭要素を取り除く
+  - `Undo(i)`: `p`のi番目の要素を取り除く
+
+SendSetでやったのと同じように、予言`Pred_A(p)`をそれぞれのsubactionsに対して定義していこう
+  各subactionに対する`NewPSet_A`表現も定義する必要がある
+
+`d`が`p`のdomain `Dom`で2つの連続する状態にある場合、
+  `p[d]`は両方の状態の同じ予言を表炎する。
+    しかし、これは今の例では真ではない。
+      - Send stepで、`Len(p) > 1`とすると、状態`s`における`p[2]`で作られた予言は、状態`t`における`p[1]`によって作られた予言である。
+      - Undo(i) stepの場合、(j > i)とすると、状態`s`における`p[j]`で作られた予言は、状態`t`における`p[j-1]`によって作られた予言である。
+    (量化されているから、真ではないと言ってるのか？)
+
+action は`p` の `Dom` と `p'` の `Dom'` の要素間の関係を定義する。
+
+Domが変わるんだわ
+-> `NewPSet_A`を直接定義しない。
+    なぜなら、 `NewPSet_A`に属する式`p'`は以下を満たさねばならない。
+    - `Dom'` の `d` が`A`に関する予言を作る`Dom`の要素`c`と一致するかどうか、もしくはいずれの要素とも一致しないかであるならば、`p'[d]`は`\Pi`の任意の値を仮定する
+    - もし、`d`がAに関する予言を一切しない`Dom`の`c`に一致するなら、`p'[d]`は`p[c]`に一致する。
+
+
+`Dom`と`Dom'`間(actionによって変わったもの)の要素の対応関係を形式的に表現、partial injectionを使って
+  A "partial" function from a set U to a set V is a function from a subset of U to V
+    element of [D --> V] for some subset D of U.
+  An injection is a function that maps different elements in its domain to different values.
+
+PartialInjectionsをTLA+で定義する(prophecy.tla)
+```
+PartialInjections(U, V) == 
+  LET PartialFcns == UNION { [D -> V] : D \in SUBSET U}
+  IN {f \in PartialFcns : \A x, y \in DOMAIN f : (x # y) => (f[x] # f[y])}
+```
+
+それぞれのsubactionに対するpartial injection `DomInj_A` が定義される
+- `DomInjChoose == [d \in Dom |-> d]`
+- `DomInjSend == [i \in 2..Len(y) |-> i - 1]`
+- `DomInjRcv == [d \in Dom |-> d]`
+- `DomInjUndo(i) == [j \in 1..Len(y)\{i} |-> IF j < i THEN j ELSE j - 1]`
+
+prophery array variableの定義で使われているsubaction Aに対して、`DomInj_A`は以下のように定義される
+- `DomInj_A == [d \in Dom \cap Dom' |-> d]`
+
+(なんかidentity function やempty functionについて話しているけれど、使わないからいいや)
+
+Prophercy Data Structure Exampleに戻るぞ
+ `NewPSet_A`を `DomInj_A` と `PredDom_A` を使って定義するぞ
+- `PredDomChoose == {}`
+- `PredDomSend == {1}`
+- `PredDomRcv == {}`
+- `PredDomUndo(i) == {i}`
+
+`NewPSet_A` 
+- `d`は`Dom`の要素でかつ、`PredDom_A` にはいっていなくて、`Dom'` の `DomInj_A[d]`に対応する要素があるような`[Dom' -> \Pi]`の関数の集合と等しいもの
+- module `Prophecy`にカプセル化する。
+```
+NewPSet(p, DomInj, PredDom) ==
+  { q \in [DomPrime -> Pi] :
+       \A d \in (DOMAIN DomInj) \ PredDom : q[DomInj[d]] = p[d] }
+```
+
+これによって、`ProphAction`が定義できる
+  これで`A^p`を定義することを許す
+```
+ProphAction(A, p, pPrime, DomInj, PredDom,  Pred(_)) ==
+  /\ A
+  /\ Pred(p)
+  /\ pPrime \in NewPSet(p,  DomInj, PredDom)   
+```
+
+`Undo`に関しては問題がある。
+- Operator `ProphAction` requires its last argument, which represents `PredA`, to be an operator with a single argument.
+- `PredUndo`は2つのargumentsを持っている。
+  - `Op(p)` equals `PredUndo(p, i )`となるような`Op`を導入して、改めて定義する
+
+これで、`SendSeqUndoP`が定義できる
+
+あとは、Refinement Mappingを定義する
+- `SpecUP`が`SendSeq`の`Spec`を実装するのを
+- アイディア:
+  - `\overline{y}`が`y`のsubsequence
+    - `y`のsubsequenceで以下のようなもの
+      - `p`が`"send"`と等しいsequenceの要素と一致するような要素のみを含んでいるようなもの
+- 実際の定義は少しトリッキー
+  - `yBar`というのを定義する
+    - Rというlocal recursive 定義を使う。
+    - `yseq`が任意のsequenceで、`pseq`が同じ長さのsequence
+    - `R(yseq, pseq)`は`yseq`のsubsequence
+      - `yseq` は `yseq[i]`　を含む iff. `pseq[i]` が `"send"`と等しい場合のみ.
+
+つくられたtheoremはTLCがチェックすることが可能
