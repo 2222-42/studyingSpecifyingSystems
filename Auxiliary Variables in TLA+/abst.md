@@ -861,3 +861,81 @@ ProphAction(A, p, pPrime, DomInj, PredDom,  Pred(_)) ==
       - `yseq` は `yseq[i]`　を含む iff. `pseq[i]` が `"send"`と等しい場合のみ.
 
 つくられたtheoremはTLCがチェックすることが可能
+
+## 4.5 Checking the Denitions
+
+`Spec^p`を定義する方法を見せてきた
+- state function `Dom`を定義して、
+- next-tate actionのdisjunctive representationのsubaction `A`に対して、以下を定義
+  - `Pred_A`
+  - `DomInj_A`
+  - `PredDom_A`
+
+これらの定義が
+`\EE p : Spec^p`が`Spec`と等しいことを
+保証するような確かな条件であることを満たさなければならない。
+
+### Pred_A
+
+まずは、`Pred_A`について。
+最初の条件は(4.11) `SpecU => [][\A <<k;K>> : A => ( \E f \in [Dom -> \Pi] : Pred_A(f))]_vars`。
+
+module prophecy で`ExistsGoodProphecy(Pred(_)) == \E q \in [Dom -> Pi] : Pred(q)`と定義されている。
+
+これにより、(4.11)は`Spec => [][A => (ExistsGoodProphecy(Pred_A))]_vars`と書ける。
+
+Aが非-空なcontextを持つ場合にこの定義がどう使われるかを見る、
+(4.11)が`UndoP(i)`を表現されるための条件は、
+```
+SpecU => [][ \A i \in Dom :
+    Undo(i) => ExistsGoodProphecy(LAMBDA p : PredUndo(p, i ))]_vars
+```
+
+### DomInj_A
+
+次に、context`<<k; K>>`のをもつaction `A` に対する `DomInj_A`の一般的な要求は、
+`Spec => [][\A <<k;K>> : A => IsDomInj(DomInj_A)]_vars`である。
+`IsDomInj` はoperator argumentを持っていないから、local definition, local LAMBDA expressionを要求されない。
+
+### PreDom_A
+
+最後に`PreDom_A`について。
+`PredDom_A` は、 `p[d]` が `A`に関する予言を作っているような、`Dom`の要素`d`の集合と等しくならなければならない。
+  このことは、`PredDom_A`に属していない任意の要素は`A`に関する予言を作らないことと等しい。
+    `A` に関する予言を作ることは、`Pred_A`の値に影響を及ぼすことである、
+      つまり、予言を作らないことは、値に影響を及ぼさないことである。
+
+確認せよ: 
+`Pred_A`の値が、`PredDom_A`に属さない任意の`d`に対する`p[d]`の値に依存されないのは、
+以下の式が真のとき、かつその時に限る
+- `\A q, r \in [Dom -> Pi] : (\E d \in PredDom_A : q[d] = r [d]) => (Pred_A(q) = Pred_A(r))`
+
+### 追加要件
+
+式が意味をなすことを保証するため、
+`PredDom_A`が`Dom`の部分集合であるという明らかな要求を作ろう
+
+`Spec => [][A => (IsPredDom(PredDom_A, Pred_A))]_vars`
+
+`A` stepが非-空なcontextを持っている場合は、以下のようになる。
+```
+Spec => [][ \A i \in Dom :
+    Undo(i) => LET Op(p) == PredUndo(p,i) 
+               IN IsPredDom(PredDom_A, Op)]_vars
+```
+もしくは`Spec => [][ \A i \in Dom : Undo(i) => IsPredDom(PredDom_A, LAMBDA p: PredUndo(p,i))]_vars`。
+
+### 要求をSpecに追加
+
+`SendSeqUndo`に追加する。
+
+同じことを`SendSet`でしたいと思う。けれど、TLCはチェックできない。
+なぜなら、`SpecU`は変数`p`の値を明示しないから。
+この場合は、`SendSetUndoP`の`p`の表現以前を別のmodule`SendSetUndo`の最後に入れるか、
+`p`の表現以前のところに`=====`を追加するかのどちらかをしよう。
+
+### まとめ
+
+これらの条件が満たされているかは、prophecy variableを追加するときに確認しましょう。
+prophecy variable付きのspecificationが求めているspecificationを実装しているかを確認する前に、
+あなたの定義をデバッグする方法を提供している。
