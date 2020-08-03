@@ -939,3 +939,21 @@ Spec => [][ \A i \in Dom :
 これらの条件が満たされているかは、prophecy variableを追加するときに確認しましょう。
 prophecy variable付きのspecificationが求めているspecificationを実装しているかを確認する前に、
 あなたの定義をデバッグする方法を提供している。
+
+## 4.6 Liveness
+
+これまではSafety Partの話だった。Liveness Partについても同様にprophecy variableを追加する。
+3.5節でリマークしたように、これは通常ではないspecificationを産む、
+  liveness propertyが、next-state actionのsubactionではないactionについてのfairness conditionを主張する
+
+history variableとは違って、specificationの形式だけではなく、specificationsも奇妙になる。
+
+`SendInt`のケースで考える
+- `SendP` step で`p'`に `\infinity`を設定するようにする、つまり、新しい値は無限大が送信されると予言すると、halt (stutter forever) してしまう。
+- Liveness Propertyを追加して、止まらないことを要求する。
+  - けど、このLiveness Property自体は、`p'`に `\infinity`を設定しないなどの何かが実際に起きないことを要求しているわけではない。
+  - このような奇妙さを、「式 `Spec` は not machine closedである」という
+    - Liveness Propertyが、Livenessと同様にSafetyにも影響を及ぼす、ということを意味する
+
+Non-machine closedなSpecは、システムが「如何に」動くかの記述には使われてはならない。
+非常に稀なケースだが、システムが「何である」かを記述するかの最も良い方法ではある。

@@ -17,7 +17,7 @@ RcvP == Rcv /\ (p' = p)
 
 NextP == SendP \/ RcvP
 
-SpecP == InitP /\ [][NextP]_varsP
+SpecP == InitP /\ [][NextP]_varsP /\ WF_vars(Next)
 
 ---------------------------------------------------------------------------
 
