@@ -22,6 +22,16 @@ PredDomUndo(i) == {i}
 DomInjUndo(i) == [j \in 1..Len(y)\{i} |-> IF j < i THEN j ELSE j - 1]
 PredUndo(p, i) == p[i] = "undo"
 
+Condition ==
+    /\ ProphCondition(Choose, DomInjChoose, PredDomChoose, PredChoose)
+    /\ ProphCondition(Send, DomInjSend, PredDomSend, PredSend)
+    /\ ProphCondition(Rcv, DomInjRcv, PredDomRcv, PredRcv)
+    /\ \E i \in Dom :
+        ProphCondition(Undo(i), DomInjUndo(i), PredDomUndo(i ),
+                        LAMBDA  p : PredUndo(p, i))
+
+THEOREM  SpecU => [][Condition]_vars
+
 ---------------------------------------------------------------
 
 VARIABLE p
@@ -54,4 +64,5 @@ THEOREM SpecUP => SS!Spec
 
 =============================================================================
 \* Modification History
+\* Last modified Mon Aug 03 10:28:09 JST 2020 by daioh
 \* Created Wed Jul 29 10:23:05 JST 2020 by daioh
