@@ -961,3 +961,58 @@ Non-machine closedなSpecは、システムが「如何に」動くかの記述�
 # 5 Stuttering Variables
 
 ## 5.1 Adding Stuttering Steps to a Simple Action
+
+- 長針`h`と短針`m`のある時計の`Spec2`
+- 長針`h`のみの時計`Spec1`
+
+`\E m: Spec2 \euiv Spec1`であるはず。
+
+Spec2がSpec1を含意していることを示すのは簡単。
+
+Spec1が`\E m: Spec2`を含意しているような証明をすることのできるRefinement Mappingはない。
+- 補助変数`s`をSpec1に追加して`Spec_1^S`を作らないといけない、以下のようなものを
+  - 59回は`s`のみを変えて(hを変えず(stuttering))、
+  - `h`を増やすようなもの
+
+このような補助変数を `stuttering variable`という。
+
+next-state action of Specs take "normal" steps
+- satisfy the next-state action of Spec when s equals `\top` (usually read "top"),
+  - some value that is not a positive integer
+  - value of s in the initial state equals `\top`
+
+`s` is set to a positive integer
+- then, `Spec^s` allows only stuttering steps that decrement s
+  - the variables of `Spec` unchanged
+  - `s` counts down to zero, it is set equal to `\top` again.
+
+ここでは"simple" subaction、contextが空なもの、をとる。
+
+subaction `A` を action `A^s` で置き換える。
+
+action A のstepの後のstuttering steps に`initVal`(なんらかの正の整数であるような初期値)を追加する。
+
+一般化する。
+最小の`\bottom`をもつwell-dounded partial order をもつような任意の集合を取る。
+```
+A^s ==
+  IF s = \top
+    THEN A /\ (s' = initVal )
+    ELSE  /\ vars' = vars
+          /\ s' = IF s = \bottom THEN \top ELSE decr(s)
+```
+
+stuttering stepsは`A` step の後ではなく前に追加することもできる。
+これは`A` stepが可能になったときだけ。
+```
+A^s ==
+  /\ ENABLED A
+  /\ IF s = \bottom
+      THEN A /\ (s' = \top )
+      ELSE  /\ vars' = vars
+            /\ s' = IF s = \top THEN initVal ELSE decr(s)
+```
+
+これらの前と後のケースをいずれの場合でもできるようにするよう一般化することはできる。
+が、やらない。
+なぜなら、それはたまに要求されることであり、2つの分離されたstuttering variablesを導入するよりも有意義に簡単にするわけではないから。
