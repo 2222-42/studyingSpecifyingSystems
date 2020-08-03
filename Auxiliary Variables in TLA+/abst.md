@@ -957,3 +957,7 @@ history variableとは違って、specificationの形式だけではなく、spe
 
 Non-machine closedなSpecは、システムが「如何に」動くかの記述には使われてはならない。
 非常に稀なケースだが、システムが「何である」かを記述するかの最も良い方法ではある。
+
+# 5 Stuttering Variables
+
+## 5.1 Adding Stuttering Steps to a Simple Action
