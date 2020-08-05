@@ -990,10 +990,14 @@ next-state action of Specs take "normal" steps
 
 subaction `A` を action `A^s` で置き換える。
 
+(5.3)(`NoStutter`)　`A^s == (s = \top) /\ A /\ (s' = s)`
+
+
 action A のstepの後のstuttering steps に`initVal`(なんらかの正の整数であるような初期値)を追加する。
 
 一般化する。
 最小の`\bottom`をもつwell-dounded partial order をもつような任意の集合を取る。
+(5.4) (`PostStutter`)
 ```
 A^s ==
   IF s = \top
@@ -1004,8 +1008,9 @@ A^s ==
 
 stuttering stepsは`A` step の後ではなく前に追加することもできる。
 これは`A` stepが可能になったときだけ。
+(`PreStutter`)
 ```
-A^s ==
+(5.5) A^s ==
   /\ ENABLED A
   /\ IF s = \bottom
       THEN A /\ (s' = \top )
@@ -1016,3 +1021,65 @@ A^s ==
 これらの前と後のケースをいずれの場合でもできるようにするよう一般化することはできる。
 が、やらない。
 なぜなら、それはたまに要求されることであり、2つの分離されたstuttering variablesを導入するよりも有意義に簡単にするわけではないから。
+
+## 5.2 Adding Stuttering Steps to Multiple Actions
+
+we first consider 
+- how to add stuttering steps before or after an action A 
+  - that may have a nonempty context
+
+We assume that (context 変数の値に依存しない)
+- the set `\Sigma`, its `\bot` element, and the operator `decr` 
+  - do not depend on the values of the context variables.
+
+However, (context 変数の値に依存しうる)
+- `initVal` may depend on them(context variables).
+
+therefore we must make sure that
+- `initVal` is evaluated with 
+  - the values of the context variables 
+    - for which the action `A` is "executed"
+
+(5.4)のような前にstuttering stepを追加するのには問題ないが、
+  (Since the stuttering steps do nothing but decrement the value of `s`,
+   it makes no difference 
+      for which value of the context variables 
+        `A^s` is "executed" 
+        when `s # \top`)
+(5.5)のような後に追加するのは問題がある。
+
+How to solve?
+- `s`の 非-`\top`な 値(複数)を 以下2つを伴うレコードとする
+  - a `val` component
+    - that equals the value of `s` described in (5.5),
+  - and a `ctxt` component 
+    - that equals the tuple of values of the context 
+      - when `initVal` is evaluated
+    - 換言すると, `ctxt` is set by the `ELSE` clause in the second conjunct of (5.5).
+      -  `s.ctxt` が the values of the `context` variables に等しくなるという条件は、
+        -  a conjunct to the `THEN` clause として追加される、
+          - `A` is executed only in that contextを確実にするために
+
+stuttering stepをactionの前や後に追加する方法
+- separate stuttering variablesを追加、もしくは
+- stuttering array variableの導入。
+
+しかし、stuttering stepは直前or即時に行われるから、
+すべて同じstuttering variable `s`に追加できる。
+  Stutering Stepは他のset `\Sigma`, its `\bot` element, and the operator `decr` を伴うsubactionに追加することが可能。
+`s`の値は、stuttering stepが追加された先のactionを示す。
+  How? `s`の非-`\top`な 値に、`id` componentを追加。
+    `id` componentはstuttering stepが追加された先のactionを同定する。
+      他のactionから区別できる。
+      actionの名前と同様にする
+    このcomponent が設定されるのは、when `s` is first set to a non-`\top` value,
+    新たなsubaction `A^s`の実行が`s \noteq \top` の場合に可能になるのは、`s.id` が the identier of `A`に等しい場合のみ.
+
+`PostStutter`と`PreStutter`は、`initVal = bot`の場合に一度だけstuttering stepを追加する。
+が、複数回追加できるようなoperatorを使うのは時々便利になる。
+
+Hourの簡単な例で考えよう。
+  Nextは常にenabled。
+  actionが1つなので、actionIdの振り方を考えなくていい。
+  contextは空でいい。
+  (あとは適宜埋めていけばいい。)
