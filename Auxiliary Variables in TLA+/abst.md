@@ -1147,3 +1147,71 @@ stuttering variableを追加してもLivenessは何も問題ない。
 `Spec`がmachine closedなら`Spec^s`もmachine closed。
 しかし、`Next^s`のsubactionsにのみfairness condition付きのstandard formにそれを追加することは、
 history variableに対しておこなったほどシンプルではない。
+
+# 6 The Snapshot Problem
+
+`single-writer atomic snapshot memory`, `snapshot object`について、Afekらの研究したアルゴリズムについて、
+そのシンプルなバージョンのアルゴリズムについて、補助変数を使ってチェックする。
+
+## 6.1 Linearizability
+
+an atomic read of an array of memory registersの実装に使われるアルゴリズム
+  このspecification は、data objectのlinearizable specificationの特殊ケース
+
+data object、state machineとも呼ばれる、は、ユーザープロセスからコマンドを実行する。
+
+`Apply(i, cmd, st)`:
+- the output and new state of the object 
+  - that results from process `i` 
+  - executing command `cmd` 
+  - when the object has state `st`
+- A record with `output` and `newState` fields describing 
+  - the result of process `i` executing command `cmd` when the object is in state `st` .
+
+- `Procs`: The set of processes.
+- `Commands(i)`: The set of commands that process `i` can issue.
+- `Outputs(i)`: The set of outputs the commands issued by process `i` can produce.
+- `InitObj`: The initial state of the object. 
+
+A linearizable implementation of the data object is
+  one in which the state of the object is internal,
+    the only externally visible actions being the issuing of the command and the return of its output.
+
+1. `BeginOp(i, cmd)` step: externally visible
+2. `DoOp(i)` step: modifies the state of the object, modifies only internal variables -- including an internal variable describing the state of the object.
+3. `EndOp(i)` step: externally visible
+
+"steps are externally visible" means that they modify externally visible variables
+
+To simplify the specication, we assume that the sets of commands and of outputs are disjoint.
+We can then use a single externally visible variable `interface`,
+- letting `BeginOp(i, cmd)` set `interface[i]` to the command `cmd` and 
+- letting `EndOp(i)` set it to the command's output.
+
+introduce an internal variable `istate` 
+- to hold the internal state of the processes
+- letting `BeginOp(i, cmd)` set `istate[i]` to `cmd`, and 
+- letting `DoOp(i)` set it to the command's output.
+
+Initially, `interface[i]` and `istate[i]` equal some output, for each `i`
+
+Fairness Conditionとかも追加する。
+
+`LinearAssumps`という仮定も追加している。
+これは、インスタンス化されたコンスタンツが以下の性質を満たすことをチェックするため
+- それら(Constants)が、moduleに対して、linearizable objectを特定するようにするため？
+(to check that the instantiated constants satisfy the properties they should for the module to specify a linearizable object.)
+
+all those propertiesを記述するために、
+`ObjValues`を導入:
+- to describe the set of all possible states of the object.
+
+
+以下の定義は、`ObjValues`を導入するのと等しい。等しさを示すのは集合論の良い練習問題になるとのこと。
+```
+ObjValues  == LET ApplyProcTo(i, S) == {Apply(i, cmd, x).newState : x \in S, cmd \in Commands(i)}
+                  ApplyTo(S) == UNION {ApplyProcTo(i, S): i \in Procs}
+                  ApplyITimes[i \in Nat] == IF i = 0 THEN {InitObj}
+                                                     ELSE ApplyTo(ApplyITimes[i-1])
+              IN UNION {ApplyITimes[i]: i \in Nat}
+```
