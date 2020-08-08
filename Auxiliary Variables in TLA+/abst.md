@@ -1102,3 +1102,37 @@ stuttering stepsの無限列を追加する場合や、
   - `Spec => [][\A <<k;K>> : A => (initVal \in Sigma)]_vars`
 3. `enabled` is equivalent to `ENABLED A` [for `PreStutter` only]
   - `Spec => [](\A <<k;K>> : enabled \equiv ENABLED A)`
+
+## 5.4 Adding Innite Stuttering
+
+actionと関連していない、無限の数のsuttering stepsを追加するケースについて、完全さのために議論する。
+
+内部変数が変わり続けるような、Refinement Mappingはあるか。
+できない。だって、 `Spec1` で許されていて全ての振舞いが止まるなら、`Spec_1^a`( `Spec1`に補助変数`a`を追加したもの )で許されていた振舞いも止まるから。
+
+解決方法: stutering variableを追加する。
+
+Let 
+- `Spec` equal `Init /\ [][Next]_vars`
+- `UC` be the stuttering action `UNCHANGED vars`
+
+Since 
+- `[Next]vars` equals `Next \/ UC`,
+
+we can write `Spec` as
+- `Init /\ [][Next \/ UC]vars`
+
+therefore, we can add the suaction `UC` to any disjunctive representation of `Next`
+
+`s`をhistory variableで追加する、`UC` に含まれるdisjucntive representationを使って(cf: section 3)
+
+これによって、`Spec^s`を定義できる。
+
+`Spec^s == Init^s /\ [][Next^s]_<<vars, s>> /\ WF_<<vars, s>>(UC^s)`
+
+` WF_<<vars, s>>(UC^s)` は`s`のみを変える。
+
+histroy variableとして追加したから、
+`\EE Init^s /\ [][Next^s]_<<vars, s>>` は `Spec`に等しい。
+
+だから、`\EE s : Spec^s` は`Spec`に等しい。
