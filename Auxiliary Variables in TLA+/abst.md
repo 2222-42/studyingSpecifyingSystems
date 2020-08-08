@@ -1136,3 +1136,14 @@ histroy variableとして追加したから、
 `\EE Init^s /\ [][Next^s]_<<vars, s>>` は `Spec`に等しい。
 
 だから、`\EE s : Spec^s` は`Spec`に等しい。
+
+## 5.5 Liveness
+
+stuttering variableを追加してもLivenessは何も問題ない。
+5.4で述べたように、`s`以外の値を変えないから。
+
+`Spec^s`は一般的ではない形式を持っているかもしれないが、それは異様なものではない。
+
+`Spec`がmachine closedなら`Spec^s`もmachine closed。
+しかし、`Next^s`のsubactionsにのみfairness condition付きのstandard formにそれを追加することは、
+history variableに対しておこなったほどシンプルではない。
