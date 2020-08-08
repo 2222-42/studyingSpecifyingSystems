@@ -1,5 +1,5 @@
 ----------------------------- MODULE Stuttering -----------------------------
-
+EXTENDS Naturals
 top == [top |-> "top"]
 
 (* the components of s are
@@ -61,9 +61,16 @@ MayPreStutter (A, enabled, actionId, context, bot, initVal, decr(_)) ==
                                     /\ s' = [s EXCEPT !.val = decr(s.val)]
 
 
+StutterConstantCondition(Sigma, bot, decr(_)) ==
+    LET InverseDecr(S) == {sig \in Sigma \ S : decr(sig) \in S}
+        R[n \in Nat] == IF n = 0 THEN {bot}
+                        ELSE LET T == R[n - 1]
+                             IN T \cup InverseDecr(T)
+    IN Sigma = UNION {R[n] : n \in Nat}
 
-
+\* to define AltStutterConstantCondition
 
 =============================================================================
 \* Modification History
+\* Last modified Sat Aug 08 10:20:05 JST 2020 by daioh
 \* Created Wed Aug 05 10:27:28 JST 2020 by daioh
