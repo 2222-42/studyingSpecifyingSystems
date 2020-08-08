@@ -1083,3 +1083,22 @@ Hourの簡単な例で考えよう。
   actionが1つなので、actionIdの振り方を考えなくていい。
   contextは空でいい。
   (あとは適宜埋めていけばいい。)
+
+## 5.3 Correctness of Adding a Stuttering Variable
+
+stuttering variable 追加したけれど、正しいのか？
+
+`\EE s: Spec^s`が`Spec`を含意することは明らか。
+
+stuttering stepsの無限列を追加する場合や、
+`PreStutter`に間違った`enabled` argumentを追加した場合は、
+等しさを示すことに失敗する。
+
+`PostStutter`と`PreStutter` operatorsの全ての使用に対して、以下の条件を満たせば、等しさが示せる。
+
+1. For every `\sigma` in `\Sigma`, the sequence of values `\sigma`, `decr(\sigma)`, `decr(decr(\sigma))`, ... is contained in `\Sigma` and eventually reaches `bot`.
+  - (`StutterConstantCondition` として定義する。)
+2. `initVal` is in `\Sigma`.
+  - `Spec => [][\A <<k;K>> : A => (initVal \in Sigma)]_vars`
+3. `enabled` is equivalent to `ENABLED A` [for `PreStutter` only]
+  - `Spec => [](\A <<k;K>> : enabled \equiv ENABLED A)`
