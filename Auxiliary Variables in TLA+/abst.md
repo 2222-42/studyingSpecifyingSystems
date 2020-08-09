@@ -1215,3 +1215,32 @@ ObjValues  == LET ApplyProcTo(i, S) == {Apply(i, cmd, x).newState : x \in S, cmd
                                                      ELSE ApplyTo(ApplyITimes[i-1])
               IN UNION {ApplyITimes[i]: i \in Nat}
 ```
+
+## 6.2 The Linearizable Snapshot Specication
+
+"a snapshot object" で意味するのは `atomic snapshot memory` とAfekらが読んでいたもの。
+
+In a snapshot object, the processes are either readers or writers.
+
+A snapshot object is an array of registers, one per writer.
+
+A write operation:
+- writes a value to the writer's register and 
+- produces as output some fixed value that is not a possible register value. 
+
+A read operation:
+- has a single command that produces the object's state as output and 
+- leaves that state unchanged.
+
+
+four constants:
+- `Readers`: the set of writer processes
+- `Writers`: the set of reader processes
+- `RegVals`: the set of possible register values
+- `InitRegVal`: a value in `RegVals` that is the initial value of a register
+
+`Linearizability` を使うので、`object`の代わりに`memory`という名前を使う。
+
+We define 
+- `NotMemVal` be the single reader command and 
+- `NotRegVal` to be the single write command output.
