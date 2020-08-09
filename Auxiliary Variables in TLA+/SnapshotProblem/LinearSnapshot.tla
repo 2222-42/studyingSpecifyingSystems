@@ -12,10 +12,10 @@ InitMem == [i \in Writers |-> InitRegVal]
 NotMemVal == CHOOSE v: v \notin MemVals
 NotRegVal == CHOOSE v: v \notin RegVals
 
-Commands(i) = IF i \in Readers THEN {NotMemVal}
+Commands(i) == IF i \in Readers THEN {NotMemVal}
                                ELSE RegVals
 
-Outputs(i) = IF i \in Readers THEN MemVals
+Outputs(i) == IF i \in Readers THEN MemVals
                               ELSE {NotRegVal}
 
 InitOutput(i) == IF i \in Readers THEN InitMem ELSE NotRegVal
@@ -24,11 +24,12 @@ Apply(i, cmd, obj) == IF i \in Readers
                             THEN [newState |-> obj, output |-> obj]
                             ELSE [newState |-> [obj EXCEPT ![i] = cmd], output |-> NotRegVal]
 
-VARIABLES mem, interface, isate
+VARIABLES mem, interface, istate
 
-INSTANCE Linearizability WITH ObjValues <- MemVals, InitObj <- InitMem, object <- mem
+INSTANCE Linearizability WITH ObjValues <- MemVals, InitObj <- InitMem, object <- mem, interface <- interface, istate <- istate
 
 ASSUME LinearAssumps
 =============================================================================
 \* Modification History
+\* Last modified Sun Aug 09 10:43:18 JST 2020 by daioh
 \* Created Sun Aug 09 10:09:49 JST 2020 by daioh
