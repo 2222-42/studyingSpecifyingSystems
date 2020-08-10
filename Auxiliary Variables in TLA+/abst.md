@@ -1314,3 +1314,46 @@ TryEndRdを定義する。
 Rd1の結果とRd2の結果を比較し、
 等しければreadに対する`EndOp`を実行し、
 そうでなければ、また次のscanを始められるようにする。
+
+## 6.4 Another Snapshot Specication
+
+Let `SpecA` be the algorithm's specification and 
+let `SSpecL` be the specification `SafeSpec` of `LinearSnapshot`.
+
+`AfekSimplied` が任意のRefinement Mapping下にあって、`LinearSnapshot`のSafety Specificationを実装していないことを示す。
+  -> 矛盾が生じるからRefinement Mappingがありえない。
+    以下のような、ケースで`\overline{istate}[i][j`の値が異なることになる。
+    - (Step1) `BeginRd(i)` -> `Rd1` -> `Rd2` -> 
+    - (Step2) Writer `j` does a complete write operation -> 
+    - (Step3) `TryEndRd(i)`
+
+`\overline{DoRd(i)}` step が 
+`\overline{DoWr(j)}` step より前に生じるように、
+`mem` と `isate` の値を選ばなければならない。
+  この選び方は `\overline{DoWr(j)}` step の後に何のstepが起きるかを知っていることを要求する
+  -> Prophecy variable を追加する
+
+prophecy variableを追加しない方法: output valueを選択する前に、できるだけreader に待機させる。
+`SpecNL` 
+- that allows the same externally visible behaviors as specification `SpecL` of `LinearSnapshot`; 
+- and whose safety specication `SSpecNL` allows the same visible behaviors as `SSpecL`.
+- in `SpecNL` we make a reader wait as long as possible before choosing its output value.
+
+依然として、
+`SSpec_NL`が`SSpec_L`と同じようなexternally visible behaviorを許されていることを示すためには、
+prohecy variableが必要。
+
+`Spec_NL`の利点:
+- prophecy variableが複雑だから、それを避けれる
+
+internal stateにmemory `mem`（read operationが返すことを許されている）の全ての値をレコードする。
+internal state は、過去において何が起きたかを記憶している。
+-> `SpecNL` will require adding a history variable to the algorithm's spec.
+
+- `wstate` : `wstate[i]` is the same as the value of `istate[i]` in `LinearSnapshot`,
+- `rstate` : 
+  - `rstate[i]` is the sequence of values that `mem` has assumed thus far while the operation has been executing.
+  - The first element of `rstate[i]` is therefore the value `mem` had when the `BeginRd(i)` step occurred
+  - The value of `rstate[i]` is the empty sequence <<>> when `i` is not executing a read operation.
+
+あとは良しなに`LinearSnapshot`の定義を拡張して、作っていけばできる。
