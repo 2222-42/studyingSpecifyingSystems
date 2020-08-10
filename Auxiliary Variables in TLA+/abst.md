@@ -1244,3 +1244,73 @@ four constants:
 We define 
 - `NotMemVal` be the single reader command and 
 - `NotRegVal` to be the single write command output.
+
+## 6.3 The Simplied Afek et al. Snapshot Algorithm
+
+`imem`という内部変数を使う
+- 値は`imem[i]`の配列で、それぞれ以下の2つを持っている
+  - i番目のregisterの値
+  - そのregister が何度書き込まれたかの数字を値にするinteger
+
+仮定: 全体のペアは、アトミックに読み込まれ書き込まれうる
+
+write operationがregisterに値`cmd`を書き込む方法:
+- `DoOp(i)` actionが`imem[i]`に`<<cmd, imem[i][2]+1>>`とする
+
+read operationがやること
+- まず scan procedure
+  - 任意の順序で、一度`imem[i]`の全ての要素を読む
+  - 任意の順序で、二回目にそれらを読む
+  - もし任意の`i`について両方とも同じ値を読んだのであれば、それは、読んだ、register 値の配列を出力する
+    - いずれかの`i`で異なる値が得られれば、出力を生成せず、procedureは続けられる。
+    - 値が出力されるまでは、延々とscan procedureは繰り返される。
+
+このscan procedureは停止しない。だから、Livenessの要求を満たせないが、Safety Partは満たせる。
+実際のアルゴリズムは、ある値`i`に対して、`imem[i]`に対して三つの異なる値が読み込まれたときに、出力を生成する方法を持っている。これを使えば、readの停止性も保証できる。
+ただし、これは複雑で、よって、Refinement Mappingもより複雑で、model checkもより時間がかかる。
+だから、シンプルなバージョンで話を進める。
+
+`MemVals`, `InitMem`, `NotMemVal`, `NotRegVal`, これらについては定義は同じ。
+
+```
+IRegVals == RegVals \X Nat
+IMemVals == [Writers -> IRegVals]
+InitIem == [i \in Writers |-> <<InitRegVal, 0>>]
+```
+
+variable `imem` について、
+- `imem[i]` は `RegVals \X Nat` の要素(上記の`imem`の説明と対応)。
+  - first component: representing `mem[i]`
+  - second component: the number of times mem[i ] has been written.
+
+variable `wrNum` について、
+- domain: `Writers` 
+- `wrNum[i]`: `BeginWr(i)`step が実行された数
+
+vbariables `rdVal1`, `rdVal2`
+- `rdVal1[i]`, `rdVal2[i]`のは、reader`i` によってscan procedure で読みこまれた値のこと
+- 初期値は空`<<>>`
+
+wrtier action は簡単。
+補足: because 
+1. wrNum[i] counts the number of BeginWr(i, cmd) steps and
+2. imem[i][2] is set to wrNum[i] by the DoWr(i)
+,
+when imem[i][2] equals wrNum[i]
+- EndWrite(i) action should be enabled and 
+- DoWr(i) disabled 
+.
+
+read action
+`BeginRd(i)`は簡単。
+
+scan procedure
+
+`AddToFcn` を使う。
+
+Rd1とRd2を定義する。
+
+TryEndRdを定義する。
+Rd1の結果とRd2の結果を比較し、
+等しければreadに対する`EndOp`を実行し、
+そうでなければ、また次のscanを始められるようにする。
