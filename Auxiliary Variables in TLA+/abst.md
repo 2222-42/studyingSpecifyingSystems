@@ -1357,3 +1357,49 @@ internal state は、過去において何が起きたかを記憶している�
   - The value of `rstate[i]` is the empty sequence <<>> when `i` is not executing a read operation.
 
 あとは良しなに`LinearSnapshot`の定義を拡張して、作っていけばできる。
+
+## 6.5 NewLinearSnapshot Implements LinearSnapshot
+
+略記:
+- `S_{L} == \EE mem, istate : Spec_{L}`
+- `S_{NL} == \EE mem, rstate, wstate : Spec_{NL}`
+
+`Spec_A` implements `S_L`を証明したい。
+だから、
+- `Spec_A` implements `S_{NL}` (6.6節で証明)
+- `Spec_{NL}` implements `S_L` (本節6.5説で証明)
+を示す。
+
+To show that `S_NL` implements `S_L`, 
+we add to `Spec_NL` a prophecy variable `p` then a stuttering variable `s` 
+  to obtain a specication `Spec^{ps}_{NL} `
+    such that `\EE s, p : Spec^{ps}_{NL}` is equivalent to `Spec_NL`.
+We then show that `\EE s; p : Spec^{ps}_{NL}` implements `S_L` 
+  by showing that `Spec^{ps}_NL` implements `Spec_L` 
+    under a suitable refinement mapping `mem <- \overline{mem}`, `istate <- \overline{istate}`.
+
+pとsについて
+- `p`: prophecy variable to predict 
+  - for each reader `i` which element of the sequence of memory values `rstate[i]` will be chosen as the output.
+- `s`: stuttering variable;
+  - A single stuttering step after a `BeginRd(i)` step if `p[i]` predicts that the read will return the current value of memory.
+  - Stuttering steps after a `DoWr(i)` step
+    - that will implement the `\overline{DoRd(j)}` step of every current read operation 
+    - that returns the value of `mem` immediately after the `DoWr(i)` step.
+
+### 6.5.1 Adding the Prophecy Variable
+
+It is most convenient to define `p` in terms of a disjunctive representation 
+  in which `EndRd(i)` is decomposed into `\E j \in 1 . . Len(rstate[i]) : IEndRd(i, j )`
+(どこらへんが便利になるんだ？)
+
+A prediction is made for reader `i` when the element `i` is added to `Dom`, 
+  which is done by a `BeginRd(i)` step.
+The prediction is used by the `IEndRd(i, j)` action.
+
+予言するから定義しないと。
+The denitions of `PredA`, `PredDomA`, and `DomInjA` for the subactions `A`
+
+The module next defines the temporal formula `Condition`, which should be implied by `Spec`.
+
+TLCは`\EE p: SpecP` が`Spec`に等しいことを証明できる。
