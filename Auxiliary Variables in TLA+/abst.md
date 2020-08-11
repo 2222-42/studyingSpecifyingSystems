@@ -1398,7 +1398,7 @@ A prediction is made for reader `i` when the element `i` is added to `Dom`,
 The prediction is used by the `IEndRd(i, j)` action.
 
 予言するから定義しないと。
-The denitions of `PredA`, `PredDomA`, and `DomInjA` for the subactions `A`
+The definitions of `PredA`, `PredDomA`, and `DomInjA` for the subactions `A`
 
 The module next defines the temporal formula `Condition`, which should be implied by `Spec`.
 
