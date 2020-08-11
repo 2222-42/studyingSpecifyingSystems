@@ -73,6 +73,14 @@ NextUP == \/ \E i \in Readers : \/ BeginRdP(i)
 
 SpecP == InitUP /\ [][NextUP]_varsP
 
+THEOREM SpecP => [][\A i \in Readers : BeginRdP(i) => (IF p'[i] = 1 THEN 1 else 0) \in {0,1}]_varsP
+
+THEOREM SpecP => [][\A i \in Writers, cmd \in RegVals : 
+                        DoWrP(i) => 
+                            {j \in Readers : (rstate[j] # <<>> /\ (p[j] = Len(rstate'[j]))) } \in (SUBSET Readers)]_varsP
+
+---------------------------------------------------------------
+
 \* yBar == 
 \*     LET RECURSIVE R(_, _)
 \*         R(yseq, pseq) ==
