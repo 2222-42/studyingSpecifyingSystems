@@ -1456,3 +1456,20 @@ reader `i` に対しては、問題がある。
 theoremはTLCによってチェック可能である。
 
 これで、`SpecPS`が`LS!Spec`のsafety part と Liveness partの両方を満たすことを示せる。
+
+## 6.6 AfekSimplied Implements NewLinearSnapshot
+
+6.5節で述べたこと
+- `Spec_A` implements `S_{NL}` (6.6節で証明)
+
+history variableを追加したら、Refinement Mapping作れる。
+  `Spec_NL`のrstateを記録するために。
+
+実装は単純
+  Note:`memBar`を使っている定義は、`mem`を使っている
+  `memBar`が`imem`から得られたmemory value と等しくなるようにmoduleは定義している、
+    `memBar[i]`が`imem[i]`の最初の要素と等しくなるようにして
+
+あとはrefinement mappingを作る。
+
+TLCでチェックすることができる。
