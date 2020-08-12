@@ -57,7 +57,7 @@ Condition ==
 VARIABLE p
 varsP == <<vars, p>>
 
-InitUP == Init /\ (p = EmptyFcn)
+InitP == Init /\ (p = EmptyFcn)
 
 BeginRdP(i) == ProphAction(BeginRd(i),p,p', DomInjBeginRd, PredDomBeginRd, PredBeginRd)
 BeginWrP(i, cmd) == ProphAction(BeginWr(i, cmd),p,p', DomInjBeginWr, PredDomBeginWr, PredBeginWr)
@@ -66,12 +66,12 @@ IEndRdP(i,j) == ProphAction(IEndRd(i,j),p,p', DomInjIEndRd, PredDomIEndRd(i), LA
 EndWrP(i) == ProphAction(EndWr(i),p,p', DomInjEndWr, PredDomEndWr, PredEndWr)
 
 
-NextUP == \/ \E i \in Readers : \/ BeginRdP(i)
-                                \/ \E j \in 1..Len(rstate[i]): IEndRdP(i,j)
-          \/ \E i \in Writers : \/ \E cmd \in RegVals : \/ BeginWrP(i,cmd) 
-                                \/ DoWrP(i) \/ EndWrP(i)
+NextP == \/ \E i \in Readers : \/ BeginRdP(i)
+                               \/ \E j \in 1..Len(rstate[i]): IEndRdP(i,j)
+         \/ \E i \in Writers : \/ \E cmd \in RegVals : \/ BeginWrP(i,cmd) 
+                               \/ DoWrP(i) \/ EndWrP(i)
 
-SpecP == InitUP /\ [][NextUP]_varsP
+SpecP == InitUP /\ [][NextP]_varsP
 
 THEOREM SpecP => [][\A i \in Readers : BeginRdP(i) => (IF p'[i] = 1 THEN 1 else 0) \in {0,1}]_varsP
 
@@ -81,19 +81,33 @@ THEOREM SpecP => [][\A i \in Writers, cmd \in RegVals :
 
 ---------------------------------------------------------------
 
-\* yBar == 
-\*     LET RECURSIVE R(_, _)
-\*         R(yseq, pseq) ==
-\*             IF yseq = <<>>
-\*                 THEN yseq
-\*                 ELSE IF Head(pseq) = "send"
-\*                         THEN <<Head(yseq)>> \o R(Tail(yseq), Tail(pseq))
-\*                         ELSE R(Tail(yseq), Tail(pseq))
-\*     IN R(y,p)
 
-\* SS == INSTANCE SendSeq WITH y <- yBar
+VARIABLE s
+varsPS == <<vars, p, s>>
 
-\* THEOREM SpecUP => SS!Spec
+INSTANCE Stuttering WITH vars <- varsP
+
+InitPS == InitP /\ (p = EmptyFcn)
+
+BeginRdPS(i) == MayPostStutter(BeginRdP(i),"BeginRd",i,0, 
+                               IF p'[i] = 1 THEN 1 ELSE 0, LAMBDA j: j -1)
+ASSUME StutterConstantCondition({0,1}, 0, LAMBDA j: j - 1)
+BeginWrPS(i, cmd) == NoStutter(BeginWrP(i, cmd))
+DoWrPS(i) == MayPostStutter(DoWrP(i),"DoWr",i,{}, 
+                            {j \in Readers: (rstate[j] # <<>>) /\ (p[j] = Len(rstate'[j]))}, 
+                            LAMBDA S: S\{CHOOSE x \in S : TRUE})
+ASSUME StutterConstantCondition(SUBSET {Readers}, {}, LAMBDA S: S\{CHOOSE x \in S : TRUE})
+IEndRdPS(i,j) == NoStutter(IEndRdP(i,j))
+EndWrPS(i) == NoStutter(EndWrP(i))
+
+
+NextPS == \/ \E i \in Readers : \/ BeginRdPS(i)
+                                \/ \E j \in 1..Len(rstate[i]): IEndRdPS(i,j)
+          \/ \E i \in Writers : \/ \E cmd \in RegVals : \/ BeginWrPS(i,cmd) 
+                                \/ DoWrPS(i) \/ EndWrPS(i)
+
+SafeSpecPS == InitPS /\ [][NextPS]|varsPS
+SpecPS == SafeSpecPS /\ Fairness
 
 =============================================================================
 \* Modification History

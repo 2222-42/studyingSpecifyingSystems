@@ -1403,3 +1403,21 @@ The definitions of `PredA`, `PredDomA`, and `DomInjA` for the subactions `A`
 The module next defines the temporal formula `Condition`, which should be implied by `Spec`.
 
 TLCは`\EE p: SpecP` が`Spec`に等しいことを証明できる。
+
+### 6.5.2 Adding the Stuttering Variable
+
+We need to add a single stuttering step after a `BeginRdP(i)` step 
+  iff the reader will output the current value of `mem`,
+    which is the case iff the step sets `p[i]` to 1.
+
+We also need to add a stuttering step after `DoWrP(i)` 
+  for every currently reading reader `j` for which `p[j]` predicts 
+    that the value of `mem` that the step appends to `rstate[j]` is the one that the read will output.
+
+`SpecPS`を作るにあたっては、
+`Spec => [][\A <<k;K>> : A => (initVal \in Sigma)]_vars`の条件もある。
+
+TLCでチェック可能
+
+`ASSUME`ステートメントを追加して、`MayPostStutter`に対してコンスタントコンディションをチェックするため、
+stuttering stepsが追加されるのに使われているか
