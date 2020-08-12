@@ -71,9 +71,9 @@ NextP == \/ \E i \in Readers : \/ BeginRdP(i)
          \/ \E i \in Writers : \/ \E cmd \in RegVals : \/ BeginWrP(i,cmd) 
                                \/ DoWrP(i) \/ EndWrP(i)
 
-SpecP == InitUP /\ [][NextP]_varsP
+SpecP == InitP /\ [][NextP]_varsP
 
-THEOREM SpecP => [][\A i \in Readers : BeginRdP(i) => (IF p'[i] = 1 THEN 1 else 0) \in {0,1}]_varsP
+THEOREM SpecP => [][\A i \in Readers : BeginRdP(i) => (IF p'[i] = 1 THEN 1 ELSE 0) \in {0,1}]_varsP
 
 THEOREM SpecP => [][\A i \in Writers, cmd \in RegVals : 
                         DoWrP(i) => 
@@ -106,10 +106,34 @@ NextPS == \/ \E i \in Readers : \/ BeginRdPS(i)
           \/ \E i \in Writers : \/ \E cmd \in RegVals : \/ BeginWrPS(i,cmd) 
                                 \/ DoWrPS(i) \/ EndWrPS(i)
 
-SafeSpecPS == InitPS /\ [][NextPS]|varsPS
+SafeSpecPS == InitPS /\ [][NextPS]_varsPS
 SpecPS == SafeSpecPS /\ Fairness
+
+istateBar == 
+    [i \in Readers \cup Writers |->
+        IF i \in Writers
+            THEN wstate[i]
+            ELSE IF rstate[i] = <<>>
+                 THEN interface[i]
+                 ELSE IF p[i] = 1
+                        THEN IF /\ s # top
+                                /\ s.id = "BeginRd"
+                                /\ s.ctxt = i
+                                THEN NotMemVal
+                                ELSE rstate[i][1]
+                        ELSE IF \/ p[i] > Len(rstate[i])
+                                \/ /\ s # top
+                                   /\ s.id = "DoWr"
+                                   /\ i \in s.val
+                                THEN NotMemVal
+                                ELSE rstate[i][p[i]]
+    ]
+
+LS == INSTANCE LinearSnapshot WITH istate <- istateBar
+
+THEOREM SpecPS => LS!Spec
 
 =============================================================================
 \* Modification History
-\* Last modified Tue Aug 11 16:21:48 JST 2020 by daioh
+\* Last modified Wed Aug 12 10:42:11 JST 2020 by daioh
 \* Created Tue Aug 11 10:17:22 JST 2020 by daioh

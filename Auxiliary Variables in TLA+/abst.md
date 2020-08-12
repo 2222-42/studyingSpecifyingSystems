@@ -1421,3 +1421,38 @@ TLCでチェック可能
 
 `ASSUME`ステートメントを追加して、`MayPostStutter`に対してコンスタントコンディションをチェックするため、
 stuttering stepsが追加されるのに使われているか
+
+### 6.5.3 The Renement Mapping
+
+6.5 で述べたこと
+> We then show that `\EE s; p : Spec^{ps}_{NL}` implements `S_L` 
+>   by showing that `Spec^{ps}_NL` implements `Spec_L` 
+>     under a suitable refinement mapping `mem <- \overline{mem}`, `istate <- \overline{istate}`.
+
+`mem`はそのまんま。
+
+`\overline{istate[i]}`については、
+writer `i`の場合は、`wsate[i]`に等しくすればよいが、
+reader `i` に対しては、問題がある。
+
+`SpecL`において, readもwriteも実行していないany process `i`に対して , `istate[i]` equals `interface[i]`.
+だから、現在読まれていない任意の reader `i` に対して、`\overline{istate[i]}`は `interface[i]` に等しい。
+現在読み込まれている場合、
+- `\overline{istate[i]}`は `interface[i]` に等しいのは正しい、iff. `rstate[i] # <<>>`
+  - これが意味するところは、`p[i]` がpositive integer であること
+
+これには2つの可能性がある。
+- `p[i] = 1`
+  - `DoRD(i)`stepは シミュレートされる、 `BeginRd(i)`に付け加えるstuttering step によって
+  - `\overline{istate[i]}`は `rstate[i][1` に等しいのは正しい、iff. `rstate[i] # <<>>`
+    - `BeginRd(i)`の後や、直後にstutterging stepが付け加えられる前を除く
+- `p[i] > 1`
+  - `DoRD(i)`stepは シミュレートされる、 `DoWr(j)`に付け加えるstuttering stepsのいずれかによって
+  - `\overline{istate[i]}`は `NotMemVal` に等しい、`p[i] <= Len(rstate[i])`の限り
+    - ただし`i`が`s.val`の要素である場合はそうではない。
+
+`istateBar`を定義する。
+
+theoremはTLCによってチェック可能である。
+
+これで、`SpecPS`が`LS!Spec`のsafety part と Liveness partの両方を満たすことを示せる。
